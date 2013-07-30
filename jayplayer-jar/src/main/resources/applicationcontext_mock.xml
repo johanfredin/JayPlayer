@@ -17,7 +17,7 @@
 	<!-- This file is used when we want to use mock repositories -->
     <context:component-scan base-package="se.fredin.jayplayer" />
 	
-	<bean id="trackRepository" class="se.fredin.jayplayer.database.mock.MockTrackRepository" />  
+	<bean id="trackService" class="se.fredin.jayplayer.service.TrackServiceImpl" />  
 	<bean id="display" class="se.fredin.jayplayer.frontend.Display" />  
 	
 </beans>

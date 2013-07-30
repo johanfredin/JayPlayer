@@ -18,6 +18,8 @@ public interface TrackService {
 	
 	void shuffle();
 	
+	void repeat(boolean repeat);
+	
 	void setVolume(float volume);
 	
 	void deleteTrack(long id);
