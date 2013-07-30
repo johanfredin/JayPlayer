@@ -8,5 +8,5 @@ public enum ButtonActions {
 	PREVIOUS,
 	SHUFFLE,
 	REPEAT
-
+	
 }

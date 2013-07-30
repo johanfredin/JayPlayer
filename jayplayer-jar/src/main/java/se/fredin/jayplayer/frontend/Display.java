@@ -11,7 +11,6 @@ import java.io.File;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -33,6 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import se.fredin.jayplayer.domain.Track;
 import se.fredin.jayplayer.service.TrackService;
+import se.fredin.jayplayer.utils.IconLoader;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
 
 
 public class Display extends JFrame {
@@ -40,29 +43,27 @@ public class Display extends JFrame {
 	@Autowired
 	private TrackService trackService;
 	
+	private IconLoader iconLoader;
+	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private DefaultListModel<String> playListDlm, tracksListDlm;
 	private JList<String> tracksDisplay, playListDisplay;
-	
 	private JSlider volumeSlider;
 	private JProgressBar progressBar;
-	
 	private JMenuItem newPlayListItem, loadPlaylistItem, loadMusicItem, quitItem;
 	private JMenuItem clearTracksItem, clearPlayListsItem;
 	private JTextField statusField;
-	
 	private JButton previousButton, playPauseButton, nextButton;
 	private JButton shuffleButton, repeatButton;
-	
 	private JLabel timeLabel;
 	
-	
-
 	public Display() {
 		setTitle("JayPlayer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 750, 500);
+		
+		iconLoader = new IconLoader();
 		
 		initMenuBar();
 				
@@ -80,24 +81,53 @@ public class Display extends JFrame {
 		
 		Dimension buttonDimension = new Dimension(50, 30);
 		
-		previousButton = new JButton();
+		previousButton = new JButton(iconLoader.getIcon(iconLoader.BACKWARDS));
+		previousButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				statusField.setText("previous clicked");
+			}
+		});
 		previousButton.setPreferredSize(buttonDimension);
-		previousButton.setIcon(new ImageIcon("/home/johan/workspace/MediaPlayer/JayPlayer/jayplayer-jar/icons/backwards.png"));
 		buttonsAndVolumePanel.add(previousButton);
 				
-		playPauseButton = new JButton();
+		playPauseButton = new JButton(iconLoader.getIcon(iconLoader.PLAY));
+		playPauseButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(playPauseButton.getIcon() == iconLoader.getIcon(iconLoader.PLAY)) {
+					statusField.setText("play clicked");
+					playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
+				} else {
+					statusField.setText("pause");
+					playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PLAY));
+				}
+			}
+		});
 		playPauseButton.setPreferredSize(buttonDimension);
-		playPauseButton.setIcon(new ImageIcon("/home/johan/workspace/MediaPlayer/JayPlayer/jayplayer-jar/icons/play.png"));
 		buttonsAndVolumePanel.add(playPauseButton);
 		
-		nextButton = new JButton();
+		nextButton = new JButton(iconLoader.getIcon(iconLoader.FORWARD));
+		nextButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				statusField.setText("next clicked");
+			}
+		});
 		nextButton.setPreferredSize(buttonDimension);
-		nextButton.setIcon(new ImageIcon("/home/johan/workspace/MediaPlayer/JayPlayer/jayplayer-jar/icons/forward.png"));
 		buttonsAndVolumePanel.add(nextButton);
 		
 		volumeSlider = new JSlider();
-		volumeSlider.setValue(1);
-		volumeSlider.setMaximum(1);
+		volumeSlider.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				statusField.setText("Volume: " + volumeSlider.getValue());
+			}
+		});
+		volumeSlider.addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				statusField.setText("Volume: " + volumeSlider.getValue());
+			}
+		});
+		volumeSlider.setValue(100);
 		volumeSlider.setPreferredSize(new Dimension(100, 30));
 		buttonsAndVolumePanel.add(volumeSlider);
 		
@@ -117,14 +147,34 @@ public class Display extends JFrame {
 		bottomPanel.add(shuffleRepeatPanel);
 		shuffleRepeatPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
-		shuffleButton = new JButton();
+		shuffleButton = new JButton(iconLoader.getIcon(iconLoader.SHUFFLE));
+		shuffleButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(shuffleButton.getIcon() == iconLoader.getIcon(iconLoader.SHUFFLE)) {
+					statusField.setText("shuffle enabled");
+					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE_ENABLED));
+				} else {
+					statusField.setText("shuffle disabled");
+					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE));
+				}
+			}
+		});
 		shuffleButton.setPreferredSize(buttonDimension);
-		shuffleButton.setIcon(new ImageIcon("/home/johan/workspace/MediaPlayer/JayPlayer/jayplayer-jar/icons/shuffle.png"));
 		shuffleRepeatPanel.add(shuffleButton);
 		
-		repeatButton = new JButton();
+		repeatButton = new JButton(iconLoader.getIcon(iconLoader.REPEAT));
+		repeatButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(repeatButton.getIcon() == iconLoader.getIcon(iconLoader.REPEAT)) {
+					statusField.setText("repeat enabled");
+					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
+				} else {
+					statusField.setText("repeat disabled");
+					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT));
+				}
+			}
+		});
 		repeatButton.setPreferredSize(buttonDimension);
-		repeatButton.setIcon(new ImageIcon("/home/johan/workspace/MediaPlayer/JayPlayer/jayplayer-jar/icons/repeat.png"));
 		shuffleRepeatPanel.add(repeatButton);
 		
 		JPanel playListPanel = new JPanel();
@@ -198,10 +248,9 @@ public class Display extends JFrame {
 		editFileMenu.add(clearTracksItem);
 		editFileMenu.add(clearPlayListsItem);
 		menuBar.add(editFileMenu);
-				
 	}
 
-	public JMenuItem addMenuItemListener(final MenuActions action) {
+	private JMenuItem addMenuItemListener(final MenuActions action) {
 		JMenuItem item = new JMenuItem(action.getActionName());
 		item.addActionListener(new ActionListener() {
 			@Override
@@ -236,6 +285,8 @@ public class Display extends JFrame {
 		});
 		return item;
 	}
+	
+	
 	
 	
 }
