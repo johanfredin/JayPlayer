@@ -10,8 +10,10 @@ import se.fredin.jayplayer.domain.Track;
 @Service
 public class TrackServiceImpl implements TrackService {
 
-	private Map<Long, Track> tracks = new HashMap<Long, Track>();
-	private long id;
+	private Map<Integer, Track> tracks = new HashMap<Integer, Track>();
+	private int id;
+	private boolean repeat;
+	private String status;
 		
 	@Override
 	public Track addTrack(Track track) {
@@ -21,64 +23,106 @@ public class TrackServiceImpl implements TrackService {
 	}
 
 	@Override
-	public Track getTrack(long id) {
+	public Track getTrack(int id) {
 		return tracks.get(id);
 	}
 	
 	@Override
-	public void playTrack(long id) {
+	public void playTrack(int id) {
 		stop();
 		tracks.get(id).play();
+		status = "Now playing " + tracks.get(id).getTitle();
 	}
 
 	@Override
 	public void stop() {
 		for(Track t : tracks.values())
 			t.stop();
+		status = "Stopped All Music";
 	}
 
 	@Override
 	public void nextTrack() {
-		playTrack(nextId());
+		if(!repeat && id >= tracks.size() - 1) 
+			id = tracks.size() - 1;
+		else if(repeat && id >= tracks.size() - 1) 
+			id = 0;
+		else
+			id++;
+		playTrack(id);
 	}
 
 	@Override
 	public void previousTrack() {
-		playTrack(previousId());
+		if(!repeat && id <= 0)
+			id = 0;
+		else if(repeat && id <= 0) 
+			id = tracks.size() - 1;
+		else
+			id--;
+		playTrack(id);
 	}
 
 	@Override
-	public void shuffle() {
-		playTrack((int) Math.random() * tracks.size());
+	public void shuffle(boolean shuffle) {
+		if(shuffle) {
+			status = "Shuffle Enabled";
+			//playTrack((int) Math.random() * tracks.size());
+		} else
+			status = "Shuffle Disabled";
+		
 	}
 	
 	@Override
 	public void setVolume(float volume) {
 		for(Track t : tracks.values())
 			t.setVolume(volume);
+		
 	}
 
 	@Override
-	public void deleteTrack(long id) {
+	public void deleteTrack(int id) {
+		status = "Removed " + tracks.get(id).getTitle();
 		tracks.remove(id);
 	}
 
 	@Override
 	public void clearTrackList() {
 		tracks.clear();
+		status = "Removed All Tracks";
 	}
 	
-	public long nextId() {
+	@Override
+	public int nextId() {
 		return this.id++;
 	}
-	public long previousId() {
+	
+	@Override
+	public int previousId() {
 		return this.id--;
+	}
+	
+	@Override
+	public void repeat(boolean repeat) {
+		if(repeat) 
+			status = "Repeat Enabled";
+		else
+			status = "Repeat Disabled";
+		this.repeat = repeat;
 	}
 
 	@Override
-	public void repeat(boolean repeat) {
-		// TODO Auto-generated method stub
-		
+	public int getId() {
+		return id;
+	}
+	
+	@Override
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public String getStatus() {
+		return this.status;
 	}
 
 }

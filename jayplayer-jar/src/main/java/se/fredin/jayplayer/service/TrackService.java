@@ -6,9 +6,9 @@ public interface TrackService {
 
 	Track addTrack(Track track);
 	
-	Track getTrack(long id);
+	Track getTrack(int id);
 	
-	void playTrack(long id);
+	void playTrack(int id);
 	
 	void stop();
 	
@@ -16,14 +16,23 @@ public interface TrackService {
 	
 	void previousTrack();
 	
-	void shuffle();
+	void shuffle(boolean shuffle);
 	
 	void repeat(boolean repeat);
 	
 	void setVolume(float volume);
 	
-	void deleteTrack(long id);
+	void deleteTrack(int id);
 	
 	void clearTrackList();
 	
+	int getId();
+	
+	int nextId();
+	
+	int previousId();
+	
+	void setId(int id);
+	
+	String getStatus();
 }

@@ -56,12 +56,12 @@ public class Display extends JFrame {
 	private JTextField statusField;
 	private JButton previousButton, playPauseButton, nextButton;
 	private JButton shuffleButton, repeatButton;
-	private JLabel timeLabel;
+	private JLabel timeLabel, totalDuration;
 	
 	public Display() {
 		setTitle("JayPlayer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 750, 500);
+		setBounds(100, 100, 800, 500);
 		
 		iconLoader = new IconLoader();
 		
@@ -84,7 +84,9 @@ public class Display extends JFrame {
 		previousButton = new JButton(iconLoader.getIcon(iconLoader.BACKWARDS));
 		previousButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				statusField.setText("previous clicked");
+				trackService.previousTrack();
+				tracksDisplay.setSelectedIndex(trackService.getId());
+				statusField.setText(trackService.getStatus());
 			}
 		});
 		previousButton.setPreferredSize(buttonDimension);
@@ -94,12 +96,13 @@ public class Display extends JFrame {
 		playPauseButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(playPauseButton.getIcon() == iconLoader.getIcon(iconLoader.PLAY)) {
-					statusField.setText("play clicked");
+					trackService.playTrack(tracksDisplay.getSelectedIndex());
 					playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
 				} else {
-					statusField.setText("pause");
+					trackService.stop();
 					playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PLAY));
 				}
+				statusField.setText(trackService.getStatus());
 			}
 		});
 		playPauseButton.setPreferredSize(buttonDimension);
@@ -108,7 +111,9 @@ public class Display extends JFrame {
 		nextButton = new JButton(iconLoader.getIcon(iconLoader.FORWARD));
 		nextButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				statusField.setText("next clicked");
+				trackService.nextTrack();
+				tracksDisplay.setSelectedIndex(trackService.getId());
+				statusField.setText(trackService.getStatus());
 			}
 		});
 		nextButton.setPreferredSize(buttonDimension);
@@ -118,12 +123,14 @@ public class Display extends JFrame {
 		volumeSlider.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				trackService.setVolume(volumeSlider.getValue() * 0.01f);
 				statusField.setText("Volume: " + volumeSlider.getValue());
 			}
 		});
 		volumeSlider.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseDragged(MouseEvent e) {
+				trackService.setVolume(volumeSlider.getValue() * 0.01f);
 				statusField.setText("Volume: " + volumeSlider.getValue());
 			}
 		});
@@ -135,13 +142,28 @@ public class Display extends JFrame {
 		bottomPanel.add(trackProgressPanel);
 		trackProgressPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
-		timeLabel = new JLabel("0.0");
+		timeLabel = new JLabel("0:00");
 		timeLabel.setFont(new Font("Dialog", Font.BOLD, 12));
 		trackProgressPanel.add(timeLabel);
 		
 		progressBar = new JProgressBar();
+		progressBar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				//TODO: Skip forward in track
+			}
+		});
+		progressBar.addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				//TODO: Skip forward in track
+			}
+		});
 		progressBar.setPreferredSize(new Dimension(300, 30));
 		trackProgressPanel.add(progressBar);
+		
+		totalDuration = new JLabel("3:25");
+		trackProgressPanel.add(totalDuration);
 		
 		JPanel shuffleRepeatPanel = new JPanel();
 		bottomPanel.add(shuffleRepeatPanel);
@@ -150,13 +172,11 @@ public class Display extends JFrame {
 		shuffleButton = new JButton(iconLoader.getIcon(iconLoader.SHUFFLE));
 		shuffleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(shuffleButton.getIcon() == iconLoader.getIcon(iconLoader.SHUFFLE)) {
-					statusField.setText("shuffle enabled");
+				if(shuffleButton.getIcon() == iconLoader.getIcon(iconLoader.SHUFFLE)) 
 					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE_ENABLED));
-				} else {
-					statusField.setText("shuffle disabled");
+				else 
 					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE));
-				}
+				statusField.setText(trackService.getStatus());
 			}
 		});
 		shuffleButton.setPreferredSize(buttonDimension);
@@ -166,12 +186,13 @@ public class Display extends JFrame {
 		repeatButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(repeatButton.getIcon() == iconLoader.getIcon(iconLoader.REPEAT)) {
-					statusField.setText("repeat enabled");
+					trackService.repeat(true);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
 				} else {
-					statusField.setText("repeat disabled");
+					trackService.repeat(false);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT));
 				}
+				statusField.setText(trackService.getStatus());
 			}
 		});
 		repeatButton.setPreferredSize(buttonDimension);
@@ -245,8 +266,9 @@ public class Display extends JFrame {
 		fileMenu.add(quitItem);
 		menuBar.add(fileMenu);
 		
-		editFileMenu.add(clearTracksItem);
-		editFileMenu.add(clearPlayListsItem);
+		//TODO: Uncomment later, some weird thing with windowbuilder editor when theese are there
+//		editFileMenu.add(clearTracksItem);
+//		editFileMenu.add(clearPlayListsItem);
 		menuBar.add(editFileMenu);
 	}
 
@@ -270,13 +292,19 @@ public class Display extends JFrame {
 							tracksListDlm.addElement(track.getTitle());
 						}
 					}
+					trackService.setId(0);
+					tracksDisplay.setSelectedIndex(trackService.getId());
+					statusField.setText("Added " + tracksListDlm.getSize());
 					break;
 				case QUIT:
+					trackService.stop();
 					System.exit(0);
 					break;
 				case CLEAR_TRACKS:
+					trackService.stop();
 					tracksListDlm.removeAllElements();
 					trackService.clearTrackList();
+					statusField.setText(trackService.getStatus());
 					break;
 				default:
 					break;

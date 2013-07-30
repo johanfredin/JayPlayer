@@ -10,7 +10,7 @@ public class Track {
 	private String path;
 	private MediaPlayer player;
 	private Media media;
-	private long id;
+	private int id;
 	
 	protected Track() {}
 	
@@ -27,6 +27,8 @@ public class Track {
 		new JFXPanel();
 		this.media = new Media(path);
 		this.player = new MediaPlayer(media);
+		
+		
 	}
 	
 	
@@ -54,11 +56,11 @@ public class Track {
 		player.stop();
 	}
 	
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	
-	public long getId() {
+	public int getId() {
 		return this.id;
 	}
 	
