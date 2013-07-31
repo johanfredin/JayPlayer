@@ -1,12 +1,16 @@
 package se.fredin.jayplayer.frontend;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 
 import javax.swing.BoxLayout;
@@ -33,9 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import se.fredin.jayplayer.domain.Track;
 import se.fredin.jayplayer.service.TrackService;
 import se.fredin.jayplayer.utils.IconLoader;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
+import javax.swing.SwingConstants;
 
 
 public class Display extends JFrame {
@@ -82,8 +84,10 @@ public class Display extends JFrame {
 		Dimension buttonDimension = new Dimension(50, 30);
 		
 		previousButton = new JButton(iconLoader.getIcon(iconLoader.BACKWARDS));
+		previousButton.setEnabled(false);
 		previousButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
 				trackService.previousTrack();
 				tracksDisplay.setSelectedIndex(trackService.getId());
 				statusField.setText(trackService.getStatus());
@@ -93,10 +97,12 @@ public class Display extends JFrame {
 		buttonsAndVolumePanel.add(previousButton);
 				
 		playPauseButton = new JButton(iconLoader.getIcon(iconLoader.PLAY));
+		playPauseButton.setEnabled(false);
 		playPauseButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(playPauseButton.getIcon() == iconLoader.getIcon(iconLoader.PLAY)) {
-					trackService.playTrack(tracksDisplay.getSelectedIndex());
+					tracksDisplay.setSelectedIndex(trackService.getId());
+					trackService.playTrack(trackService.getId());
 					playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
 				} else {
 					trackService.stop();
@@ -109,8 +115,10 @@ public class Display extends JFrame {
 		buttonsAndVolumePanel.add(playPauseButton);
 		
 		nextButton = new JButton(iconLoader.getIcon(iconLoader.FORWARD));
+		nextButton.setEnabled(false);
 		nextButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
 				trackService.nextTrack();
 				tracksDisplay.setSelectedIndex(trackService.getId());
 				statusField.setText(trackService.getStatus());
@@ -120,6 +128,7 @@ public class Display extends JFrame {
 		buttonsAndVolumePanel.add(nextButton);
 		
 		volumeSlider = new JSlider();
+		volumeSlider.setEnabled(false);
 		volumeSlider.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -150,13 +159,13 @@ public class Display extends JFrame {
 		progressBar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				//TODO: Skip forward in track
+				//TODO: Skip forward/backward in track
 			}
 		});
 		progressBar.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				//TODO: Skip forward in track
+				//TODO: Skip forward/backward in track
 			}
 		});
 		progressBar.setPreferredSize(new Dimension(300, 30));
@@ -170,12 +179,17 @@ public class Display extends JFrame {
 		shuffleRepeatPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		shuffleButton = new JButton(iconLoader.getIcon(iconLoader.SHUFFLE));
+		shuffleButton.setEnabled(false);
 		shuffleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(shuffleButton.getIcon() == iconLoader.getIcon(iconLoader.SHUFFLE)) 
+				if(shuffleButton.getIcon() == iconLoader.getIcon(iconLoader.SHUFFLE)) {
 					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE_ENABLED));
-				else 
+					trackService.shuffle(true);
+				}
+				else {
 					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE));
+					trackService.shuffle(false);
+				}
 				statusField.setText(trackService.getStatus());
 			}
 		});
@@ -183,6 +197,7 @@ public class Display extends JFrame {
 		shuffleRepeatPanel.add(shuffleButton);
 		
 		repeatButton = new JButton(iconLoader.getIcon(iconLoader.REPEAT));
+		repeatButton.setEnabled(false);
 		repeatButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(repeatButton.getIcon() == iconLoader.getIcon(iconLoader.REPEAT)) {
@@ -199,6 +214,7 @@ public class Display extends JFrame {
 		shuffleRepeatPanel.add(repeatButton);
 		
 		JPanel playListPanel = new JPanel();
+		playListPanel.setBackground(new Color(105, 105, 105));
 		playListPanel.setBorder(new EmptyBorder(10, 20, 20, 10));
 		contentPane.add(playListPanel, BorderLayout.WEST);
 		
@@ -206,9 +222,12 @@ public class Display extends JFrame {
 		playListPanel.setLayout(new BoxLayout(playListPanel, BoxLayout.PAGE_AXIS));
 		
 		JLabel playListsLabel = new JLabel("Playlists");
+		playListsLabel.setForeground(new Color(211, 211, 211));
+		playListsLabel.setFont(new Font("Impact", Font.PLAIN, 14));
 		playListsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		playListPanel.add(playListsLabel);
 		playListDisplay = new JList<String>(playListDlm);
+		playListDisplay.setBackground(new Color(0, 0, 0));
 		playListDisplay.setBorder(new EmptyBorder(25, 0, 0, 0));
 		
 		JScrollPane playListScroller = new JScrollPane(playListDisplay);
@@ -217,16 +236,35 @@ public class Display extends JFrame {
 		playListPanel.add(playListScroller);
 		
 		JPanel mainPanel = new JPanel();
+		mainPanel.setBackground(new Color(105, 105, 105));
 		mainPanel.setBorder(new EmptyBorder(10, 20, 20, 10));
 		contentPane.add(mainPanel, BorderLayout.CENTER);
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 		
 		JLabel tracksLabel = new JLabel("Tracks");
+		tracksLabel.setForeground(new Color(211, 211, 211));
+		tracksLabel.setFont(new Font("Impact", Font.PLAIN, 14));
 		tracksLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		mainPanel.add(tracksLabel);
 		
 		tracksListDlm = new DefaultListModel<String>();
 		tracksDisplay = new JList<String>(tracksListDlm);
+		tracksDisplay.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(!trackService.isEmpty()) {
+					trackService.setId(tracksDisplay.getSelectedIndex());
+					if(e.getClickCount() >= 2) {
+						playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
+						trackService.playTrack(trackService.getId());
+						statusField.setText(trackService.getStatus());
+					}
+				}
+			}
+		});
+		tracksDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
+		tracksDisplay.setBackground(new Color(0, 0, 0));
+		tracksDisplay.setForeground(new Color(0, 255, 0));
 		tracksDisplay.setBorder(new EmptyBorder(10, 10, 10, 10));
 		JScrollPane tracksScroller = new JScrollPane(tracksDisplay);
 		tracksScroller.setPreferredSize(new Dimension(mainPanel.getWidth(), mainPanel.getHeight() - tracksLabel.getHeight()));
@@ -236,15 +274,24 @@ public class Display extends JFrame {
 		contentPane.add(topPanel, BorderLayout.NORTH);
 		
 		statusField = new JTextField();
+		statusField.setHorizontalAlignment(SwingConstants.CENTER);
 		statusField.setFont(new Font("Dialog", Font.PLAIN, 12));
 		statusField.setEditable(false);
 		statusField.setText("Welcome!");
 		topPanel.add(statusField);
-		statusField.setColumns(63);
+		statusField.setColumns(69);
 			
 		setVisible(true);
 	}
 	
+	private void enableButtons() {
+		playPauseButton.setEnabled(true);
+		nextButton.setEnabled(true);
+		previousButton.setEnabled(true);
+		volumeSlider.setEnabled(true);
+		shuffleButton.setEnabled(true);
+		repeatButton.setEnabled(true);
+	}
 	
 	private void initMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
@@ -267,8 +314,8 @@ public class Display extends JFrame {
 		menuBar.add(fileMenu);
 		
 		//TODO: Uncomment later, some weird thing with windowbuilder editor when theese are there
-//		editFileMenu.add(clearTracksItem);
-//		editFileMenu.add(clearPlayListsItem);
+		editFileMenu.add(clearTracksItem);
+		editFileMenu.add(clearPlayListsItem);
 		menuBar.add(editFileMenu);
 	}
 
@@ -291,10 +338,11 @@ public class Display extends JFrame {
 							trackService.addTrack(track);
 							tracksListDlm.addElement(track.getTitle());
 						}
+						trackService.setId(0);
+						tracksDisplay.setSelectedIndex(trackService.getId());
+						statusField.setText("Added " + trackService.getTrackAmount() + " tracks");
+						enableButtons();
 					}
-					trackService.setId(0);
-					tracksDisplay.setSelectedIndex(trackService.getId());
-					statusField.setText("Added " + tracksListDlm.getSize());
 					break;
 				case QUIT:
 					trackService.stop();
@@ -313,6 +361,9 @@ public class Display extends JFrame {
 		});
 		return item;
 	}
+
+
+	
 	
 	
 	

@@ -3,6 +3,7 @@ package se.fredin.jayplayer.domain;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
 public class Track {
 	
@@ -11,6 +12,7 @@ public class Track {
 	private MediaPlayer player;
 	private Media media;
 	private int id;
+	private boolean wasPlayed;
 	
 	protected Track() {}
 	
@@ -27,11 +29,8 @@ public class Track {
 		new JFXPanel();
 		this.media = new Media(path);
 		this.player = new MediaPlayer(media);
-		
-		
 	}
-	
-	
+		
 	public String getPath() {
 		return this.path;
 	}
@@ -48,8 +47,15 @@ public class Track {
 	}
 	
 	public void play() {
-		if(media != null)
-			player.play();
+		if(media != null) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					player.play();
+					wasPlayed = true;
+				}
+			}).run();;
+		}
 	}
 	
 	public void stop() {
@@ -66,6 +72,25 @@ public class Track {
 	
 	public void setVolume(float volume) {
 		player.setVolume(volume);
+	}
+	
+	public double getVolume() {
+		return player.getVolume();
+	}
+	
+	public Duration getCurrentTime() {
+		return player.getCurrentTime();
+	}
+	
+	public Duration getTotalTime() {
+		return player.getTotalDuration();
+	}
+	
+	public boolean wasPlayed() {
+		return this.wasPlayed;
+	}
+	public void setWasPlayed(boolean wasPlayed) {
+		this.wasPlayed = wasPlayed;
 	}
 	
 

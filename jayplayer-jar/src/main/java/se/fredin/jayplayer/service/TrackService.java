@@ -1,5 +1,6 @@
 package se.fredin.jayplayer.service;
 
+import javafx.util.Duration;
 import se.fredin.jayplayer.domain.Track;
 
 public interface TrackService {
@@ -35,4 +36,12 @@ public interface TrackService {
 	void setId(int id);
 	
 	String getStatus();
+	
+	Duration getCurrentTime(int id);
+	
+	Duration getTotalTime(int id);
+	
+	int getTrackAmount();
+	
+	boolean isEmpty();
 }
