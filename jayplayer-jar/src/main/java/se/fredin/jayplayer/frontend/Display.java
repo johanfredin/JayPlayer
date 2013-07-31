@@ -13,6 +13,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 
+import javafx.scene.input.KeyCode;
+
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -37,7 +39,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import se.fredin.jayplayer.domain.Track;
 import se.fredin.jayplayer.service.TrackService;
 import se.fredin.jayplayer.utils.IconLoader;
+
 import javax.swing.SwingConstants;
+
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 
 public class Display extends JFrame {
@@ -53,7 +59,7 @@ public class Display extends JFrame {
 	private JList<String> tracksDisplay, playListDisplay;
 	private JSlider volumeSlider;
 	private JProgressBar progressBar;
-	private JMenuItem newPlayListItem, loadPlaylistItem, loadMusicItem, quitItem;
+	private JMenuItem newPlayListItem, loadMusicItem, quitItem;
 	private JMenuItem clearTracksItem, clearPlayListsItem;
 	private JTextField statusField;
 	private JButton previousButton, playPauseButton, nextButton;
@@ -249,6 +255,36 @@ public class Display extends JFrame {
 		
 		tracksListDlm = new DefaultListModel<String>();
 		tracksDisplay = new JList<String>(tracksListDlm);
+		tracksDisplay.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(!trackService.isEmpty()) {
+					switch(e.getKeyCode()) {
+					case KeyEvent.VK_ENTER:
+						trackService.playTrack(trackService.getId());
+						statusField.setText(trackService.getStatus());
+						break;
+					case KeyEvent.VK_DELETE:
+						trackService.deleteTrack(trackService.getId());
+						statusField.setText(trackService.getStatus());
+						tracksListDlm.remove(trackService.getId());
+						break;
+					case KeyEvent.VK_UP:
+						if(trackService.getId() > 0) 
+							tracksDisplay.setSelectedIndex(trackService.previousId());
+						break;
+					case KeyEvent.VK_DOWN:
+						if(trackService.getId() < trackService.getTrackAmount() - 1) 
+							tracksDisplay.setSelectedIndex(trackService.nextId());
+						break;
+					}
+				}
+			}
+			@Override
+			public void keyReleased(KeyEvent e) {
+				trackService.setWasPlayed(false);
+			}
+		});
 		tracksDisplay.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -284,13 +320,13 @@ public class Display extends JFrame {
 		setVisible(true);
 	}
 	
-	private void enableButtons() {
-		playPauseButton.setEnabled(true);
-		nextButton.setEnabled(true);
-		previousButton.setEnabled(true);
-		volumeSlider.setEnabled(true);
-		shuffleButton.setEnabled(true);
-		repeatButton.setEnabled(true);
+	private void enableButtons(boolean enable) {
+		playPauseButton.setEnabled(enable);
+		nextButton.setEnabled(enable);
+		previousButton.setEnabled(enable);
+		volumeSlider.setEnabled(enable);
+		shuffleButton.setEnabled(enable);
+		repeatButton.setEnabled(enable);
 	}
 	
 	private void initMenuBar() {
@@ -300,7 +336,6 @@ public class Display extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		JMenu editFileMenu = new JMenu("Edit");
 		newPlayListItem = new JMenuItem("New Playlist");
-		loadPlaylistItem = new JMenuItem("Load Playlist");
 		loadMusicItem = addMenuItemListener(MenuActions.LOAD_MUSIC); 
 		quitItem = addMenuItemListener(MenuActions.QUIT);
 		clearTracksItem = addMenuItemListener(MenuActions.CLEAR_TRACKS);
@@ -308,14 +343,13 @@ public class Display extends JFrame {
 				
 		
 		fileMenu.add(newPlayListItem);
-		fileMenu.add(loadPlaylistItem);
 		fileMenu.add(loadMusicItem);
 		fileMenu.add(quitItem);
 		menuBar.add(fileMenu);
 		
 		//TODO: Uncomment later, some weird thing with windowbuilder editor when theese are there
-		editFileMenu.add(clearTracksItem);
-		editFileMenu.add(clearPlayListsItem);
+//		editFileMenu.add(clearTracksItem);
+//		editFileMenu.add(clearPlayListsItem);
 		menuBar.add(editFileMenu);
 	}
 
@@ -341,7 +375,7 @@ public class Display extends JFrame {
 						trackService.setId(0);
 						tracksDisplay.setSelectedIndex(trackService.getId());
 						statusField.setText("Added " + trackService.getTrackAmount() + " tracks");
-						enableButtons();
+						enableButtons(true);
 					}
 					break;
 				case QUIT:
@@ -352,6 +386,7 @@ public class Display extends JFrame {
 					trackService.stop();
 					tracksListDlm.removeAllElements();
 					trackService.clearTrackList();
+					enableButtons(false);
 					statusField.setText(trackService.getStatus());
 					break;
 				default:

@@ -97,6 +97,7 @@ public class TrackServiceImpl implements TrackService {
 		}
 	}
 	
+	@Override
 	public void setWasPlayed(boolean wasPlayed) {
 		for(Track t : tracks.values())
 			t.setWasPlayed(wasPlayed);

@@ -44,4 +44,6 @@ public interface TrackService {
 	int getTrackAmount();
 	
 	boolean isEmpty();
+	
+	void setWasPlayed(boolean wasPlayed);
 }
