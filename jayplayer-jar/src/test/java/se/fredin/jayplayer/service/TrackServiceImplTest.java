@@ -1,22 +1,15 @@
 package se.fredin.jayplayer.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import se.fredin.jayplayer.App;
 import se.fredin.jayplayer.domain.Track;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/applicationcontext_mock.xml"})
 public class TrackServiceImplTest {
 
-	@Autowired
 	private TrackService trackService;
 	
 	@Before

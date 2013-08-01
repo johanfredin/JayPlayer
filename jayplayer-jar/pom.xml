@@ -59,17 +59,7 @@
 			<version>${log4j.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>${org.springframework-version}</version>
-		</dependency>
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${org.springframework-version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>

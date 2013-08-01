@@ -1,49 +1,164 @@
 package se.fredin.jayplayer.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.util.Duration;
 import se.fredin.jayplayer.domain.Track;
 
-public interface TrackService {
+public class TrackService {
 
-	Track addTrack(Track track);
+	private List<Track> tracks = new ArrayList<Track>();
+	private int id;
+	private boolean repeat;
+	private boolean shuffle;
+	private String status;
+	private int trackCount;
 	
-	Track getTrack(int id);
+	public Track addTrack(Track track) {
+		track.setId(nextId());
+		tracks.add(track);
+		return track;
+	}
+
+	public Track getTrack(int id) {
+		return tracks.get(id);
+	}
 	
-	void playTrack(int id);
+	public void playTrack(int id) {
+		this.id = id;
+		stop();
+		tracks.get(id).play();
+		status = "Now playing " + tracks.get(id).getTitle();
+	}
+
+	public void stop() {
+		for(Track t : tracks)
+			t.stop();
+		status = "Stopped All Music";
+	}
+
+	public void nextTrack() {
+		if(shuffle) {
+			playRandomTrack();
+			return;
+		}
+		
+		if(!repeat && id >= tracks.size() - 1) 
+			id = tracks.size() - 1;
+		else if(repeat && id >= tracks.size() - 1) 
+			id = 0;
+		else
+			id++;
+		
+		playTrack(id);
+	}
+
+	public void previousTrack() {
+		if(shuffle) {
+			playRandomTrack();
+			return;
+		}
+		
+		if(!repeat && id <= 0)
+			id = 0;
+		else if(repeat && id <= 0) 
+			id = tracks.size() - 1;
+		else
+			id--;
+		
+		playTrack(id);
+	}
+
+	private void playRandomTrack() {
+		int randomTrack = (int)(Math.random() * tracks.size());
+		for(Track t : tracks) {
+			if(!t.wasPlayed()) {
+				trackCount++;
+				playTrack(randomTrack);
+				break;
+			} else if(trackCount >= tracks.size() && repeat) {
+				setWasPlayed(false);
+				playTrack(randomTrack);
+				trackCount = 0;
+			} else
+				stop();
+		}
+	}
 	
-	void stop();
+	public void setWasPlayed(boolean wasPlayed) {
+		for(Track t : tracks)
+			t.setWasPlayed(wasPlayed);
+	}
+
+	public void shuffle(boolean shuffle) {
+		this.shuffle = shuffle;
+		if(shuffle) 
+			status = "Shuffle Enabled";
+		else {
+			status = "Shuffle Disabled";
+			setWasPlayed(false);
+			trackCount = 0;
+		}
+	}
 	
-	void nextTrack();
+	public void setVolume(float volume) {
+		for(Track t : tracks)
+			t.setVolume(volume);
+	}
+
+	public void deleteTrack(int id) {
+		status = "Removed " + tracks.get(id).getTitle();
+		tracks.remove(id);
+	}
+
+	public void clearTrackList() {
+		tracks.clear();
+		status = "Removed All Tracks";
+	}
 	
-	void previousTrack();
+	public int nextId() {
+		return this.id++;
+	}
 	
-	void shuffle(boolean shuffle);
+	public int previousId() {
+		return this.id--;
+	}
 	
-	void repeat(boolean repeat);
+	public void repeat(boolean repeat) {
+		if(repeat) 
+			status = "Repeat Enabled";
+		else
+			status = "Repeat Disabled";
+		this.repeat = repeat;
+	}
+
+	public int getId() {
+		return id;
+	}
 	
-	void setVolume(float volume);
+	public void setId(int id) {
+		this.id = id;
+	}
 	
-	void deleteTrack(int id);
+	public String getStatus() {
+		return this.status;
+	}
+
+	public Duration getCurrentTime(int id) {
+		return tracks.get(id).getCurrentTime();
+	}
 	
-	void clearTrackList();
+	public Duration getTotalTime(int id) {
+		return tracks.get(id).getTotalTime();
+	}
 	
-	int getId();
+	public int getTrackAmount() {
+		return tracks.size();
+	}
 	
-	int nextId();
-	
-	int previousId();
-	
-	void setId(int id);
-	
-	String getStatus();
-	
-	Duration getCurrentTime(int id);
-	
-	Duration getTotalTime(int id);
-	
-	int getTrackAmount();
-	
-	boolean isEmpty();
-	
-	void setWasPlayed(boolean wasPlayed);
+	public boolean isEmpty() {
+		return tracks.isEmpty();
+	}
+
 }
