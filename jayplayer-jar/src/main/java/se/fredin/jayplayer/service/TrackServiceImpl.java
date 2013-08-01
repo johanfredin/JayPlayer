@@ -1,7 +1,7 @@
 package se.fredin.jayplayer.service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import javafx.util.Duration;
 
@@ -12,7 +12,7 @@ import se.fredin.jayplayer.domain.Track;
 @Service
 public class TrackServiceImpl implements TrackService {
 
-	private Map<Integer, Track> tracks = new HashMap<Integer, Track>();
+	private List<Track> tracks = new ArrayList<Track>();
 	private int id;
 	private boolean repeat;
 	private boolean shuffle;
@@ -23,7 +23,7 @@ public class TrackServiceImpl implements TrackService {
 	@Override
 	public Track addTrack(Track track) {
 		track.setId(nextId());
-		tracks.put(track.getId(), track);
+		tracks.add(track);
 		return track;
 	}
 
@@ -42,7 +42,7 @@ public class TrackServiceImpl implements TrackService {
 
 	@Override
 	public void stop() {
-		for(Track t : tracks.values())
+		for(Track t : tracks)
 			t.stop();
 		status = "Stopped All Music";
 	}
@@ -83,7 +83,7 @@ public class TrackServiceImpl implements TrackService {
 
 	private void playRandomTrack() {
 		int randomTrack = (int)(Math.random() * tracks.size());
-		for(Track t : tracks.values()) {
+		for(Track t : tracks) {
 			if(!t.wasPlayed()) {
 				trackCount++;
 				playTrack(randomTrack);
@@ -99,7 +99,7 @@ public class TrackServiceImpl implements TrackService {
 	
 	@Override
 	public void setWasPlayed(boolean wasPlayed) {
-		for(Track t : tracks.values())
+		for(Track t : tracks)
 			t.setWasPlayed(wasPlayed);
 	}
 
@@ -117,7 +117,7 @@ public class TrackServiceImpl implements TrackService {
 	
 	@Override
 	public void setVolume(float volume) {
-		for(Track t : tracks.values())
+		for(Track t : tracks)
 			t.setVolume(volume);
 	}
 

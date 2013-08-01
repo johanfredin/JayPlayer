@@ -19,5 +19,6 @@
 	
 	<bean id="trackService" class="se.fredin.jayplayer.service.TrackServiceImpl" />  
 	<bean id="display" class="se.fredin.jayplayer.frontend.Display" />  
+	<bean id="settingsService" class="se.fredin.jayplayer.service.SettingsServiceImpl" />
 	
 </beans>

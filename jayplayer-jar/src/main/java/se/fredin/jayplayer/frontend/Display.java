@@ -37,6 +37,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import se.fredin.jayplayer.domain.Track;
+import se.fredin.jayplayer.service.SettingsService;
 import se.fredin.jayplayer.service.TrackService;
 import se.fredin.jayplayer.utils.IconLoader;
 
@@ -50,6 +51,9 @@ public class Display extends JFrame {
 	
 	@Autowired
 	private TrackService trackService;
+	
+	@Autowired
+	private SettingsService settingsService;
 	
 	private IconLoader iconLoader;
 	
@@ -141,6 +145,10 @@ public class Display extends JFrame {
 				trackService.setVolume(volumeSlider.getValue() * 0.01f);
 				statusField.setText("Volume: " + volumeSlider.getValue());
 			}
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				settingsService.saveVolumeSettings(volumeSlider.getValue() * 0.01f);
+			}
 		});
 		volumeSlider.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
@@ -184,6 +192,7 @@ public class Display extends JFrame {
 		bottomPanel.add(shuffleRepeatPanel);
 		shuffleRepeatPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
+		// TODO: Fix so that icon loads from file if set properly!!
 		shuffleButton = new JButton(iconLoader.getIcon(iconLoader.SHUFFLE));
 		shuffleButton.setEnabled(false);
 		shuffleButton.addActionListener(new ActionListener() {
@@ -191,10 +200,12 @@ public class Display extends JFrame {
 				if(shuffleButton.getIcon() == iconLoader.getIcon(iconLoader.SHUFFLE)) {
 					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE_ENABLED));
 					trackService.shuffle(true);
+					settingsService.saveShuffleSettings(iconLoader.getIcon(iconLoader.SHUFFLE_ENABLED));
 				}
 				else {
 					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE));
 					trackService.shuffle(false);
+					settingsService.saveShuffleSettings(iconLoader.getIcon(iconLoader.SHUFFLE));
 				}
 				statusField.setText(trackService.getStatus());
 			}
@@ -209,9 +220,11 @@ public class Display extends JFrame {
 				if(repeatButton.getIcon() == iconLoader.getIcon(iconLoader.REPEAT)) {
 					trackService.repeat(true);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
+					settingsService.saveRepeatSettings(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
 				} else {
 					trackService.repeat(false);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT));
+					settingsService.saveRepeatSettings(iconLoader.getIcon(iconLoader.REPEAT));
 				}
 				statusField.setText(trackService.getStatus());
 			}
@@ -265,9 +278,9 @@ public class Display extends JFrame {
 						statusField.setText(trackService.getStatus());
 						break;
 					case KeyEvent.VK_DELETE:
+						tracksListDlm.removeElement(trackService.getTrack(trackService.getId()).getTitle());
 						trackService.deleteTrack(trackService.getId());
 						statusField.setText(trackService.getStatus());
-						tracksListDlm.remove(trackService.getId());
 						break;
 					case KeyEvent.VK_UP:
 						if(trackService.getId() > 0) 
@@ -283,6 +296,11 @@ public class Display extends JFrame {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				trackService.setWasPlayed(false);
+				switch(e.getKeyCode()) {
+				case KeyEvent.VK_UP : case KeyEvent.VK_DOWN:
+					settingsService.saveSelectedIndex(trackService.getId());
+					break;
+				}
 			}
 		});
 		tracksDisplay.addMouseListener(new MouseAdapter() {
@@ -296,6 +314,10 @@ public class Display extends JFrame {
 						statusField.setText(trackService.getStatus());
 					}
 				}
+			}
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				settingsService.saveSelectedIndex(trackService.getId());
 			}
 		});
 		tracksDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
@@ -327,6 +349,7 @@ public class Display extends JFrame {
 		volumeSlider.setEnabled(enable);
 		shuffleButton.setEnabled(enable);
 		repeatButton.setEnabled(enable);
+				
 	}
 	
 	private void initMenuBar() {
