@@ -7,7 +7,8 @@ public enum MenuActions {
 	LOAD_MUSIC("Load Music"),
 	QUIT("Quit"),
 	CLEAR_TRACKS("Clear Tracks"),
-	CLEAR_PLAYLISTS("Clear Playlists");
+	CLEAR_PLAYLISTS("Clear Playlists"),
+	ABOUT("About");
 	
 	private String actionName;
 	

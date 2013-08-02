@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 
-import javax.swing.ImageIcon;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -57,7 +55,15 @@ public class PlayerSettings {
 	
 	@SuppressWarnings("unchecked")
 	public void saveVolumeSettings(String volume) {
-		settingsObject.put("volume", volume);
+		double d = Double.parseDouble(volume) * 100;
+		int i = (int) d;
+		settingsObject.put("volume", "" + i);
+		writeToFile();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void rememberUser() {
+		settingsObject.put("returnUser", " back ");
 		writeToFile();
 	}
 	
@@ -104,6 +110,7 @@ public class PlayerSettings {
 			settings = getFromFile("repeatIcon").toString();
 			return settings;
 		} catch(NullPointerException ex) {}
+		System.out.println("Settings is " + settings);
 		return "repeat";
 	}
 
@@ -116,13 +123,22 @@ public class PlayerSettings {
 		return 0;
 	}
 
-	public float loadVolume() {
+	public int loadVolume() {
 		String settings = null;
 		try {
 			settings = getFromFile("volume").toString();
-			return Float.parseFloat(settings);
+			return Integer.parseInt(settings);
 		} catch(NullPointerException ex) {}
-		return 1.0f;
+		return 100;
+	}
+	
+	public String loadIsBack() {
+		String settings = null;
+		try {
+			settings = getFromFile("returnUser").toString();
+			return settings;
+		} catch(NullPointerException ex) {}
+		return " ";
 	}
 
 }

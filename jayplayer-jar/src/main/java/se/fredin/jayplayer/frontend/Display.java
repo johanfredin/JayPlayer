@@ -126,7 +126,7 @@ public class Display extends JFrame {
 		nextButton.setPreferredSize(buttonDimension);
 		buttonsAndVolumePanel.add(nextButton);
 		
-		volumeSlider = new JSlider();
+		volumeSlider = new JSlider(0, 100, (int) playerSettings.loadVolume());
 		volumeSlider.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -145,7 +145,6 @@ public class Display extends JFrame {
 				statusField.setText("Volume: " + volumeSlider.getValue());
 			}
 		});
-		volumeSlider.setValue(100);
 		volumeSlider.setPreferredSize(new Dimension(100, 30));
 		buttonsAndVolumePanel.add(volumeSlider);
 		
@@ -180,8 +179,10 @@ public class Display extends JFrame {
 		bottomPanel.add(shuffleRepeatPanel);
 		shuffleRepeatPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
-		// TODO: Fix so that icon loads from file if set properly!!
 		shuffleButton = new JButton(iconLoader.getIcon(playerSettings.loadShuffleSettings()));
+		if(shuffleButton.getIcon() == iconLoader.getIcon(iconLoader.SHUFFLE_ENABLED))
+			trackService.shuffle(true);
+		
 		shuffleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(shuffleButton.getIcon() == iconLoader.getIcon(iconLoader.SHUFFLE)) {
@@ -200,17 +201,20 @@ public class Display extends JFrame {
 		shuffleButton.setPreferredSize(buttonDimension);
 		shuffleRepeatPanel.add(shuffleButton);
 		
-		repeatButton = new JButton(iconLoader.getIcon(iconLoader.REPEAT));
+		repeatButton = new JButton(iconLoader.getIcon(playerSettings.loadRepeatSettings()));
+		if(repeatButton.getIcon() == iconLoader.getIcon(iconLoader.REPEAT_ENABLED))
+			trackService.repeat(true);
+		
 		repeatButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(repeatButton.getIcon() == iconLoader.getIcon(iconLoader.REPEAT)) {
 					trackService.repeat(true);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
-					playerSettings.saveRepeatSettings("" + iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
+					playerSettings.saveRepeatSettings(iconLoader.REPEAT_ENABLED);
 				} else {
 					trackService.repeat(false);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT));
-					playerSettings.saveRepeatSettings("" + iconLoader.getIcon(iconLoader.REPEAT));
+					playerSettings.saveRepeatSettings(iconLoader.REPEAT);
 				}
 				statusField.setText(trackService.getStatus());
 			}
@@ -321,10 +325,11 @@ public class Display extends JFrame {
 		statusField.setHorizontalAlignment(SwingConstants.CENTER);
 		statusField.setFont(new Font("Dialog", Font.PLAIN, 12));
 		statusField.setEditable(false);
-		statusField.setText("Welcome!");
+		statusField.setText("Welcome" + playerSettings.loadIsBack() + System.getProperty("user.name").toUpperCase() + "!");
 		topPanel.add(statusField);
 		statusField.setColumns(69);
 			
+		playerSettings.rememberUser();
 		setVisible(true);
 	}
 	
@@ -334,6 +339,7 @@ public class Display extends JFrame {
 		
 		JMenu fileMenu = new JMenu("File");
 		JMenu editFileMenu = new JMenu("Edit");
+		JMenu helpMenu = new JMenu("Help");
 		newPlayListItem = new JMenuItem("New Playlist");
 		loadMusicItem = addMenuItemListener(MenuActions.LOAD_MUSIC); 
 		quitItem = addMenuItemListener(MenuActions.QUIT);
@@ -347,9 +353,15 @@ public class Display extends JFrame {
 		menuBar.add(fileMenu);
 		
 		//TODO: Uncomment later, some weird thing with windowbuilder editor when theese are there
-//		editFileMenu.add(clearTracksItem);
-//		editFileMenu.add(clearPlayListsItem);
+		editFileMenu.add(clearTracksItem);
+		editFileMenu.add(clearPlayListsItem);
 		menuBar.add(editFileMenu);
+		
+		JMenuItem aboutItem = addMenuItemListener(MenuActions.ABOUT);
+		helpMenu.add(aboutItem);
+		
+		
+		menuBar.add(helpMenu);
 	}
 
 	private JMenuItem addMenuItemListener(final MenuActions action) {
@@ -386,6 +398,8 @@ public class Display extends JFrame {
 					trackService.clearTrackList();
 					statusField.setText(trackService.getStatus());
 					break;
+				case ABOUT:
+					// TODO: Have a popup window with information about the JayPlayer
 				default:
 					break;
 				}
