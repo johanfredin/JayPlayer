@@ -44,9 +44,7 @@ import se.fredin.jayplayer.utils.PlayerSettings;
 public class Display extends JFrame {
 	
 	private TrackService trackService;
-	
-	private PlayerSettings settingsService;
-	
+	private PlayerSettings playerSettings;
 	private IconLoader iconLoader;
 	
 	private static final long serialVersionUID = 1L;
@@ -62,13 +60,15 @@ public class Display extends JFrame {
 	private JButton shuffleButton, repeatButton;
 	private JLabel timeLabel, totalDuration;
 	
-	public Display() {
+	public Display(final TrackService trackService) {
+		this.trackService = trackService;
+		this.playerSettings = new PlayerSettings();
+		this.iconLoader = new IconLoader();
+		
 		setTitle("JayPlayer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 500);
-		
-		iconLoader = new IconLoader();
-		
+				
 		initMenuBar();
 				
 		contentPane = new JPanel();
@@ -86,7 +86,6 @@ public class Display extends JFrame {
 		Dimension buttonDimension = new Dimension(50, 30);
 		
 		previousButton = new JButton(iconLoader.getIcon(iconLoader.BACKWARDS));
-		previousButton.setEnabled(false);
 		previousButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
@@ -99,7 +98,6 @@ public class Display extends JFrame {
 		buttonsAndVolumePanel.add(previousButton);
 				
 		playPauseButton = new JButton(iconLoader.getIcon(iconLoader.PLAY));
-		playPauseButton.setEnabled(false);
 		playPauseButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(playPauseButton.getIcon() == iconLoader.getIcon(iconLoader.PLAY)) {
@@ -117,7 +115,6 @@ public class Display extends JFrame {
 		buttonsAndVolumePanel.add(playPauseButton);
 		
 		nextButton = new JButton(iconLoader.getIcon(iconLoader.FORWARD));
-		nextButton.setEnabled(false);
 		nextButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
@@ -130,7 +127,6 @@ public class Display extends JFrame {
 		buttonsAndVolumePanel.add(nextButton);
 		
 		volumeSlider = new JSlider();
-		volumeSlider.setEnabled(false);
 		volumeSlider.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -139,7 +135,7 @@ public class Display extends JFrame {
 			}
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				settingsService.saveVolumeSettings(volumeSlider.getValue() * 0.01f);
+				playerSettings.saveVolumeSettings(volumeSlider.getValue() * 0.01f);
 			}
 		});
 		volumeSlider.addMouseMotionListener(new MouseMotionAdapter() {
@@ -185,19 +181,18 @@ public class Display extends JFrame {
 		shuffleRepeatPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		// TODO: Fix so that icon loads from file if set properly!!
-		shuffleButton = new JButton(iconLoader.getIcon(iconLoader.SHUFFLE));
-		shuffleButton.setEnabled(false);
+		shuffleButton = new JButton(iconLoader.getIcon(playerSettings.loadShuffleSettings()));
 		shuffleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(shuffleButton.getIcon() == iconLoader.getIcon(iconLoader.SHUFFLE)) {
 					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE_ENABLED));
 					trackService.shuffle(true);
-					settingsService.saveShuffleSettings(iconLoader.getIcon(iconLoader.SHUFFLE_ENABLED));
+					playerSettings.saveShuffleSettings(iconLoader.SHUFFLE_ENABLED);
 				}
 				else {
 					shuffleButton.setIcon(iconLoader.getIcon(iconLoader.SHUFFLE));
 					trackService.shuffle(false);
-					settingsService.saveShuffleSettings(iconLoader.getIcon(iconLoader.SHUFFLE));
+					playerSettings.saveShuffleSettings(iconLoader.SHUFFLE);
 				}
 				statusField.setText(trackService.getStatus());
 			}
@@ -206,17 +201,16 @@ public class Display extends JFrame {
 		shuffleRepeatPanel.add(shuffleButton);
 		
 		repeatButton = new JButton(iconLoader.getIcon(iconLoader.REPEAT));
-		repeatButton.setEnabled(false);
 		repeatButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(repeatButton.getIcon() == iconLoader.getIcon(iconLoader.REPEAT)) {
 					trackService.repeat(true);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
-					settingsService.saveRepeatSettings(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
+					playerSettings.saveRepeatSettings(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
 				} else {
 					trackService.repeat(false);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT));
-					settingsService.saveRepeatSettings(iconLoader.getIcon(iconLoader.REPEAT));
+					playerSettings.saveRepeatSettings(iconLoader.getIcon(iconLoader.REPEAT));
 				}
 				statusField.setText(trackService.getStatus());
 			}
@@ -290,7 +284,7 @@ public class Display extends JFrame {
 				trackService.setWasPlayed(false);
 				switch(e.getKeyCode()) {
 				case KeyEvent.VK_UP : case KeyEvent.VK_DOWN:
-					settingsService.saveSelectedIndex(trackService.getId());
+					playerSettings.saveSelectedIndex(trackService.getId());
 					break;
 				}
 			}
@@ -309,7 +303,7 @@ public class Display extends JFrame {
 			}
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				settingsService.saveSelectedIndex(trackService.getId());
+				playerSettings.saveSelectedIndex(trackService.getId());
 			}
 		});
 		tracksDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
@@ -332,16 +326,6 @@ public class Display extends JFrame {
 		statusField.setColumns(69);
 			
 		setVisible(true);
-	}
-	
-	private void enableButtons(boolean enable) {
-		playPauseButton.setEnabled(enable);
-		nextButton.setEnabled(enable);
-		previousButton.setEnabled(enable);
-		volumeSlider.setEnabled(enable);
-		shuffleButton.setEnabled(enable);
-		repeatButton.setEnabled(enable);
-				
 	}
 	
 	private void initMenuBar() {
@@ -390,7 +374,6 @@ public class Display extends JFrame {
 						trackService.setId(0);
 						tracksDisplay.setSelectedIndex(trackService.getId());
 						statusField.setText("Added " + trackService.getTrackAmount() + " tracks");
-						enableButtons(true);
 					}
 					break;
 				case QUIT:
@@ -401,7 +384,6 @@ public class Display extends JFrame {
 					trackService.stop();
 					tracksListDlm.removeAllElements();
 					trackService.clearTrackList();
-					enableButtons(false);
 					statusField.setText(trackService.getStatus());
 					break;
 				default:

@@ -48,13 +48,8 @@ public class Track {
 	
 	public void play() {
 		if(media != null) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					player.play();
-					wasPlayed = true;
-				}
-			}).run();;
+			player.play();
+			wasPlayed = true;
 		}
 	}
 	
@@ -63,7 +58,8 @@ public class Track {
 	}
 	
 	public void setId(int id) {
-		this.id = id;
+		if(media != null)
+			this.id = id;
 	}
 	
 	public int getId() {
@@ -71,11 +67,14 @@ public class Track {
 	}
 	
 	public void setVolume(float volume) {
-		player.setVolume(volume);
+		if(media != null)
+			player.setVolume(volume);
 	}
 	
 	public double getVolume() {
-		return player.getVolume();
+		if(media != null)
+			return player.getVolume();
+		return 1;
 	}
 	
 	public Duration getCurrentTime() {
@@ -90,7 +89,8 @@ public class Track {
 		return this.wasPlayed;
 	}
 	public void setWasPlayed(boolean wasPlayed) {
-		this.wasPlayed = wasPlayed;
+		if(media != null)
+			this.wasPlayed = wasPlayed;
 	}
 	
 

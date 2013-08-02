@@ -26,10 +26,12 @@ public class TrackService {
 	}
 	
 	public void playTrack(int id) {
-		this.id = id;
-		stop();
-		tracks.get(id).play();
-		status = "Now playing " + tracks.get(id).getTitle();
+		if(!tracks.isEmpty()) {
+			this.id = id;
+			stop();
+			tracks.get(id).play();
+			status = "Now playing " + tracks.get(id).getTitle();
+		}
 	}
 
 	public void stop() {
