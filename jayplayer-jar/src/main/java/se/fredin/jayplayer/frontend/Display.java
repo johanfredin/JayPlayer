@@ -135,7 +135,7 @@ public class Display extends JFrame {
 			}
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				playerSettings.saveVolumeSettings(volumeSlider.getValue() * 0.01f);
+				playerSettings.saveVolumeSettings("" + volumeSlider.getValue() * 0.01f);
 			}
 		});
 		volumeSlider.addMouseMotionListener(new MouseMotionAdapter() {
@@ -206,11 +206,11 @@ public class Display extends JFrame {
 				if(repeatButton.getIcon() == iconLoader.getIcon(iconLoader.REPEAT)) {
 					trackService.repeat(true);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
-					playerSettings.saveRepeatSettings(iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
+					playerSettings.saveRepeatSettings("" + iconLoader.getIcon(iconLoader.REPEAT_ENABLED));
 				} else {
 					trackService.repeat(false);
 					repeatButton.setIcon(iconLoader.getIcon(iconLoader.REPEAT));
-					playerSettings.saveRepeatSettings(iconLoader.getIcon(iconLoader.REPEAT));
+					playerSettings.saveRepeatSettings("" + iconLoader.getIcon(iconLoader.REPEAT));
 				}
 				statusField.setText(trackService.getStatus());
 			}
@@ -284,7 +284,7 @@ public class Display extends JFrame {
 				trackService.setWasPlayed(false);
 				switch(e.getKeyCode()) {
 				case KeyEvent.VK_UP : case KeyEvent.VK_DOWN:
-					playerSettings.saveSelectedIndex(trackService.getId());
+					playerSettings.saveSelectedIndex("" + trackService.getId());
 					break;
 				}
 			}
@@ -303,7 +303,7 @@ public class Display extends JFrame {
 			}
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				playerSettings.saveSelectedIndex(trackService.getId());
+				playerSettings.saveSelectedIndex("" + trackService.getId());
 			}
 		});
 		tracksDisplay.setFont(new Font("Impact", Font.PLAIN, 12));

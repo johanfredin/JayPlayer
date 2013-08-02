@@ -44,19 +44,19 @@ public class PlayerSettings {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void saveRepeatSettings(ImageIcon repeatIcon) {
+	public void saveRepeatSettings(String repeatIcon) {
 		settingsObject.put("repeatIcon", repeatIcon);
 		writeToFile();
 	}
 
 	@SuppressWarnings("unchecked")
-	public void saveSelectedIndex(Integer index) {
+	public void saveSelectedIndex(String index) {
 		settingsObject.put("currentIndex", index);
 		writeToFile();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void saveVolumeSettings(Float volume) {
+	public void saveVolumeSettings(String volume) {
 		settingsObject.put("volume", volume);
 		writeToFile();
 	}
@@ -77,7 +77,6 @@ public class PlayerSettings {
 	}
 	
 	public Object getFromFile(String key) {
-		Object o = null;
 		try {
 			if(!settingsFile.exists())
 				settingsFile.createNewFile();
@@ -85,32 +84,45 @@ public class PlayerSettings {
 			br = new BufferedReader(new FileReader(settingsFile));
 			settingsList = (JSONArray) parser.parse(br);
 			settingsObject = (JSONObject) settingsList.get(0);
-			o = settingsObject.get(key);
 			br.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return o;
+		} catch (Exception e) {}
+		return settingsObject.get(key);
 	}
 
 	public String loadShuffleSettings() {
-		System.out.println("In loafShuffleSettings() " + getFromFile("shuffleIcon"));
-		return getFromFile("shuffleIcon").toString();
+		String settings = null;
+		try {
+			settings = getFromFile("shuffleIcon").toString();
+			return settings;
+		} catch(NullPointerException ex) {}
+		return "shuffle";
 	}
 
-	public ImageIcon loadSaveRepeatSettings() {
-		// TODO Auto-generated method stub
-		return null;
+	public String loadRepeatSettings() {
+		String settings = null;
+		try {
+			settings = getFromFile("repeatIcon").toString();
+			return settings;
+		} catch(NullPointerException ex) {}
+		return "repeat";
 	}
 
 	public int loadSelectedIndex() {
-		// TODO Auto-generated method stub
+		String settings = null;
+		try {
+			settings = getFromFile("currentIndex").toString();
+			return Integer.parseInt(settings);
+		} catch(NullPointerException ex) {}
 		return 0;
 	}
 
-	public int loadVolume() {
-		// TODO Auto-generated method stub
-		return 0;
+	public float loadVolume() {
+		String settings = null;
+		try {
+			settings = getFromFile("volume").toString();
+			return Float.parseFloat(settings);
+		} catch(NullPointerException ex) {}
+		return 1.0f;
 	}
 
 }
