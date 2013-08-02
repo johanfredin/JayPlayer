@@ -1,11 +1,10 @@
 package se.fredin.jayplayer.domain;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import se.fredin.jayplayer.App;
 
 public class TestTrack {
 
@@ -13,7 +12,7 @@ public class TestTrack {
 	
 	@Before
 	public void init() {
-		track = new Track(App.TEST_DIR + "1.mp3");
+		
 	}
 	
 	@Test

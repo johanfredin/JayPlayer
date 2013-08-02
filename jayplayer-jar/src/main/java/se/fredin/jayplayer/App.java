@@ -6,7 +6,7 @@ import se.fredin.jayplayer.service.TrackService;
 
 public class App {
 	
-	public static final String TEST_DIR = "/home/johan/workspace/MediaPlayer/jayplayer/jayplayer-jar/tracks/";
+	public static final String JAYPLAYER_VERSION = "0.1";
 	
 	public static void main(String[] args) {
 		TrackService service = new TrackService();

@@ -39,6 +39,7 @@ import se.fredin.jayplayer.domain.Track;
 import se.fredin.jayplayer.service.TrackService;
 import se.fredin.jayplayer.utils.IconLoader;
 import se.fredin.jayplayer.utils.PlayerSettings;
+import javax.swing.ListSelectionModel;
 
 
 public class Display extends JFrame {
@@ -258,6 +259,7 @@ public class Display extends JFrame {
 		
 		tracksListDlm = new DefaultListModel<String>();
 		tracksDisplay = new JList<String>(tracksListDlm);
+		tracksDisplay.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tracksDisplay.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {

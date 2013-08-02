@@ -35,41 +35,47 @@ public class TrackService {
 	}
 
 	public void stop() {
-		for(Track t : tracks)
-			t.stop();
-		status = "Stopped All Music";
+		if(!tracks.isEmpty()) {
+			for(Track t : tracks)
+				t.stop();
+			status = "Stopped All Music";
+		}
 	}
 
 	public void nextTrack() {
-		if(shuffle) {
-			playRandomTrack();
-			return;
+		if(!tracks.isEmpty()) {
+			if(shuffle) {
+				playRandomTrack();
+				return;
+			}
+			
+			if(!repeat && id >= tracks.size() - 1) 
+				id = tracks.size() - 1;
+			else if(repeat && id >= tracks.size() - 1) 
+				id = 0;
+			else
+				id++;
+			
+			playTrack(id);
 		}
-		
-		if(!repeat && id >= tracks.size() - 1) 
-			id = tracks.size() - 1;
-		else if(repeat && id >= tracks.size() - 1) 
-			id = 0;
-		else
-			id++;
-		
-		playTrack(id);
 	}
 
 	public void previousTrack() {
-		if(shuffle) {
-			playRandomTrack();
-			return;
+		if(!tracks.isEmpty()) {
+			if(shuffle) {
+				playRandomTrack();
+				return;
+			}
+			
+			if(!repeat && id <= 0)
+				id = 0;
+			else if(repeat && id <= 0) 
+				id = tracks.size() - 1;
+			else
+				id--;
+			
+			playTrack(id);
 		}
-		
-		if(!repeat && id <= 0)
-			id = 0;
-		else if(repeat && id <= 0) 
-			id = tracks.size() - 1;
-		else
-			id--;
-		
-		playTrack(id);
 	}
 
 	private void playRandomTrack() {
@@ -110,13 +116,17 @@ public class TrackService {
 	}
 
 	public void deleteTrack(int id) {
-		status = "Removed " + tracks.get(id).getTitle();
-		tracks.remove(id);
+		if(!tracks.isEmpty()) {
+			status = "Removed " + tracks.get(id).getTitle();
+			tracks.remove(id);
+		}
 	}
 
 	public void clearTrackList() {
-		tracks.clear();
-		status = "Removed All Tracks";
+		if(!tracks.isEmpty()) {
+			tracks.clear();
+			status = "Removed All Tracks";
+		}
 	}
 	
 	public int nextId() {
@@ -161,6 +171,10 @@ public class TrackService {
 	
 	public boolean isEmpty() {
 		return tracks.isEmpty();
+	}
+	
+	public List<Track> getTracks() {
+		return this.tracks;
 	}
 
 }
