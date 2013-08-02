@@ -401,7 +401,7 @@ public class Display extends JFrame {
 					statusField.setText(trackService.getStatus());
 					break;
 				case ABOUT:
-					// TODO: Have a popup window with information about the JayPlayer
+					new AboutWindow();
 				default:
 					break;
 				}
