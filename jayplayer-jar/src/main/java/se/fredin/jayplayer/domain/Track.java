@@ -32,6 +32,8 @@ public class Track {
 	}
 		
 	public String getPath() {
+		if(path.contains("%20"))
+			path = path.replace("%20", " ");
 		return this.path;
 	}
 	

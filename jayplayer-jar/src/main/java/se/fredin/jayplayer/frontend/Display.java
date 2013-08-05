@@ -36,9 +36,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import se.fredin.jayplayer.domain.Track;
+import se.fredin.jayplayer.service.PlaylistService;
 import se.fredin.jayplayer.service.TrackService;
 import se.fredin.jayplayer.utils.IconLoader;
 import se.fredin.jayplayer.utils.PlayerSettings;
+
 import javax.swing.ListSelectionModel;
 
 
@@ -46,6 +48,7 @@ public class Display extends JFrame {
 	
 	private TrackService trackService;
 	private PlayerSettings playerSettings;
+	private PlaylistService playlistService;
 	private IconLoader iconLoader;
 	
 	private static final long serialVersionUID = 1L;
@@ -65,10 +68,13 @@ public class Display extends JFrame {
 		this.trackService = trackService;
 		this.playerSettings = new PlayerSettings();
 		this.iconLoader = new IconLoader();
+		this.playlistService = new PlaylistService();
 		
 		setTitle("JayPlayer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 500);
+		
+		playlistService.getPlaylists();
 				
 		initMenuBar();
 				
@@ -228,7 +234,7 @@ public class Display extends JFrame {
 		playListPanel.setBorder(new EmptyBorder(10, 20, 20, 10));
 		contentPane.add(playListPanel, BorderLayout.WEST);
 		
-		playListDlm = new DefaultListModel<String>();
+		playListDlm = playlistService.getPlayListNames();
 		playListPanel.setLayout(new BoxLayout(playListPanel, BoxLayout.PAGE_AXIS));
 		
 		JLabel playListsLabel = new JLabel("Playlists");
@@ -237,11 +243,15 @@ public class Display extends JFrame {
 		playListsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		playListPanel.add(playListsLabel);
 		playListDisplay = new JList<String>(playListDlm);
+		playListDisplay.setSelectedIndex(0);
+		playListDisplay.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		playListDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
+		playListDisplay.setForeground(Color.RED);
 		playListDisplay.setBackground(new Color(0, 0, 0));
-		playListDisplay.setBorder(new EmptyBorder(25, 0, 0, 0));
+		playListDisplay.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 		JScrollPane playListScroller = new JScrollPane(playListDisplay);
-		playListScroller.setPreferredSize(new Dimension(100, 400));
+		playListScroller.setPreferredSize(new Dimension(150, 400));
 		playListScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		playListPanel.add(playListScroller);
 		
@@ -257,7 +267,7 @@ public class Display extends JFrame {
 		tracksLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		mainPanel.add(tracksLabel);
 		
-		tracksListDlm = new DefaultListModel<String>();
+		tracksListDlm = playlistService.getTrackNames(playListDisplay.getSelectedValue());
 		tracksDisplay = new JList<String>(tracksListDlm);
 		tracksDisplay.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tracksDisplay.addKeyListener(new KeyAdapter() {
@@ -315,7 +325,7 @@ public class Display extends JFrame {
 		tracksDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
 		tracksDisplay.setBackground(new Color(0, 0, 0));
 		tracksDisplay.setForeground(new Color(0, 255, 0));
-		tracksDisplay.setBorder(new EmptyBorder(10, 10, 10, 10));
+		tracksDisplay.setBorder(new EmptyBorder(5, 5, 5, 5));
 		JScrollPane tracksScroller = new JScrollPane(tracksDisplay);
 		tracksScroller.setPreferredSize(new Dimension(mainPanel.getWidth(), mainPanel.getHeight() - tracksLabel.getHeight()));
 		mainPanel.add(tracksScroller);
@@ -332,6 +342,7 @@ public class Display extends JFrame {
 		statusField.setColumns(69);
 			
 		playerSettings.rememberUser();
+		trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
 		setVisible(true);
 	}
 	
@@ -355,12 +366,12 @@ public class Display extends JFrame {
 		menuBar.add(fileMenu);
 		
 		//TODO: Uncomment later, some weird thing with windowbuilder editor when theese are there
-		editFileMenu.add(clearTracksItem);
-		editFileMenu.add(clearPlayListsItem);
+//		editFileMenu.add(clearTracksItem);
+//		editFileMenu.add(clearPlayListsItem);
 		menuBar.add(editFileMenu);
 		
 		JMenuItem aboutItem = addMenuItemListener(MenuActions.ABOUT);
-		helpMenu.add(aboutItem);
+//		helpMenu.add(aboutItem);
 		
 		
 		menuBar.add(helpMenu);
@@ -387,6 +398,10 @@ public class Display extends JFrame {
 						}
 						trackService.setId(0);
 						tracksDisplay.setSelectedIndex(trackService.getId());
+						
+						//TODO:WORKING on addind to a playlist
+						playlistService.addToPlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
+						
 						statusField.setText("Added " + trackService.getTrackAmount() + " tracks");
 					}
 					break;

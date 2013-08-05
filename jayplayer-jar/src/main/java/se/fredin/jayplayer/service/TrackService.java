@@ -8,7 +8,7 @@ import se.fredin.jayplayer.domain.Track;
 
 public class TrackService {
 
-	private List<Track> tracks = new ArrayList<Track>();
+	protected List<Track> tracks = new ArrayList<Track>();
 	private int id;
 	private boolean repeat;
 	private boolean shuffle;
@@ -175,6 +175,10 @@ public class TrackService {
 	
 	public List<Track> getTracks() {
 		return this.tracks;
+	}
+	
+	public void setTrackList(List<Track> tracks) {
+		this.tracks = tracks;
 	}
 
 }
