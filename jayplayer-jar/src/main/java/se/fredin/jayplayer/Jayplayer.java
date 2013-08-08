@@ -1,10 +1,10 @@
 package se.fredin.jayplayer;
 
-import se.fredin.jayplayer.frontend.Display;
 import se.fredin.jayplayer.service.TrackService;
+import se.fredin.jayplayer.ui.Display;
 
 
-public class App {
+public class Jayplayer {
 	
 	public static final String JAYPLAYER_VERSION = "0.1";
 	

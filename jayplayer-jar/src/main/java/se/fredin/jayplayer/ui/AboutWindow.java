@@ -1,4 +1,4 @@
-package se.fredin.jayplayer.frontend;
+package se.fredin.jayplayer.ui;
 
 import java.awt.BorderLayout;
 
@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
-import se.fredin.jayplayer.App;
+import se.fredin.jayplayer.Jayplayer;
 
 public class AboutWindow extends JFrame {
 
@@ -18,6 +18,7 @@ public class AboutWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public AboutWindow() {
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setTitle("About");
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -29,7 +30,7 @@ public class AboutWindow extends JFrame {
 		contentPane.add(panel, BorderLayout.CENTER);
 		
 		JTextArea textArea = new JTextArea();
-		textArea.setText("JayPlayer " + App.JAYPLAYER_VERSION + "\n copyright Johan Fredin 2013");
+		textArea.setText("JayPlayer " + Jayplayer.JAYPLAYER_VERSION + "\n copyright Johan Fredin 2013");
 		panel.add(textArea);
 		
 		setVisible(true);
