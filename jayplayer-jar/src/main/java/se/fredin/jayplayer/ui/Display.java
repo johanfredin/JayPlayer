@@ -6,6 +6,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -15,6 +19,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -47,7 +52,7 @@ import se.fredin.jayplayer.utils.PlayerSettings;
 import javax.swing.JPopupMenu;
 
 
-public class Display extends JFrame {
+public class Display extends JFrame implements Runnable {
 	
 	private TrackService trackService;
 	private PlayerSettings playerSettings;
@@ -269,7 +274,7 @@ public class Display extends JFrame {
 				if(!trackService.isEmpty()) {
 					switch(e.getKeyCode()) {
 					case KeyEvent.VK_ENTER:
-						trackService.playTrack(trackService.getId());
+						trackService.playTrack(trackService.getId(), Display.this);
 						playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
 						statusField.setText(trackService.getStatus());
 						break;
@@ -299,7 +304,7 @@ public class Display extends JFrame {
 					trackService.setId(tracksDisplay.getSelectedIndex());
 					if(e.getClickCount() >= 2) {
 						playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
-						trackService.playTrack(trackService.getId());
+						trackService.playTrack(trackService.getId(), Display.this);
 						statusField.setText(trackService.getStatus());
 					}
 					else if(e.getButton() == MouseEvent.BUTTON3) {
@@ -310,6 +315,20 @@ public class Display extends JFrame {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				playerSettings.saveSelectedTrackIndex("" + trackService.getId());
+			}
+		});
+		tracksDisplay.setDropTarget(new DropTarget(){
+			private static final long serialVersionUID = 1L;
+			@SuppressWarnings("unchecked")
+			@Override
+			public synchronized void drop(DropTargetDropEvent ev) {
+				try {
+					ev.acceptDrop(DnDConstants.ACTION_LINK);
+					List<File> droppedFiles = (List<File>) ev.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+					loadMusic(droppedFiles);
+				} catch(Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 		});
 		tracksDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
@@ -340,7 +359,6 @@ public class Display extends JFrame {
 	private void initMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
-		
 		JMenu fileMenu = new JMenu("File");
 		JMenu editFileMenu = new JMenu("Edit");
 		JMenu helpMenu = new JMenu("Help");
@@ -349,28 +367,25 @@ public class Display extends JFrame {
 		quitItem = addMenuItemListener(MenuActions.QUIT);
 		clearTracksItem = addMenuItemListener(MenuActions.CLEAR_TRACKS);
 		clearPlayListsItem = addMenuItemListener(MenuActions.CLEAR_PLAYLISTS);
-				
 		fileMenu.add(newPlayListItem);
 		fileMenu.add(loadMusicItem);
 		fileMenu.add(quitItem);
 		menuBar.add(fileMenu);
 		
-		//TODO: Uncomment later, some weird thing with windowbuilder editor when theese are there
+		//TODO: Uncomment later, some weird thing with window builder editor when these are there
 		editFileMenu.add(clearTracksItem);
 		editFileMenu.add(clearPlayListsItem);
 		menuBar.add(editFileMenu);
 		
 		JMenuItem aboutItem = addMenuItemListener(MenuActions.ABOUT);
 		helpMenu.add(aboutItem);
-		
-		
 		menuBar.add(helpMenu);
 	}
 	
 	private void playOrStopTrack() {
 		if(!tracksListDlm.isEmpty()) {
 			if(playPauseButton.getIcon() == iconLoader.getIcon(iconLoader.PLAY)) {
-				trackService.playTrack(tracksDisplay.getSelectedIndex());
+				trackService.playTrack(tracksDisplay.getSelectedIndex(), Display.this);
 				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
 			} else {
 				trackService.stop();
@@ -385,10 +400,10 @@ public class Display extends JFrame {
 		if(!tracksListDlm.isEmpty()) {
 			switch(direction) {
 			case "next":
-				trackService.nextTrack();
+				trackService.nextTrack(Display.this);
 				break;
 			case "previous":
-				trackService.previousTrack();
+				trackService.previousTrack(Display.this);
 				break;
 			}
 			playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
@@ -463,7 +478,7 @@ public class Display extends JFrame {
 				if(typeToEdit.equals("Playlist")) {
 					//TODO: rename playlist
 				} else {
-					trackService.playTrack(tracksDisplay.getSelectedIndex());
+					trackService.playTrack(tracksDisplay.getSelectedIndex(), Display.this);
 					statusField.setText(trackService.getStatus());
 				}
 			}
@@ -490,7 +505,7 @@ public class Display extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				switch(action) {
 				case LOAD_MUSIC:
-					loadMusic();
+					loadMusicFromMenu();
 					break;
 				case QUIT:
 					trackService.stop();
@@ -516,29 +531,41 @@ public class Display extends JFrame {
 		return item;
 	}
 	
-	private void loadMusic() {
+	private void loadMusicFromMenu() {
 		JFileChooser openFile = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Music", "mp3", "wav", "MP3", "WAV");
 		openFile.setFileFilter(filter);
 		openFile.setMultiSelectionEnabled(true);
-		int returnType = openFile.showOpenDialog(null);
+		int returnType = openFile.showOpenDialog(this);
+		File[] selectedFiles = openFile.getSelectedFiles();
 		if(returnType == JFileChooser.APPROVE_OPTION) {
-			File[] selectedFiles = openFile.getSelectedFiles();
-			for(File file : selectedFiles) {
-				Track track = new Track(file.getAbsolutePath());
-				trackService.addTrack(track);
-				tracksListDlm.addElement(track.getTitle());
-			}
-			trackService.setId(0);
-			tracksDisplay.setSelectedIndex(trackService.getId());
-			if(!playListDlm.isEmpty()) {
-				playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
-				statusField.setText("Added " + trackService.getTrackAmount() + ((trackService.getTrackAmount() > 1) ? " tracks" : " track ") + "to playlist: " + playListDisplay.getSelectedValue());
-			} else
-				statusField.setText("Added " + trackService.getTrackAmount() + ((trackService.getTrackAmount() > 1) ? " tracks" : " track"));
+			List<File> files = new ArrayList<File>();
+			for(int i = 0; i < selectedFiles.length; i++)
+				files.add(selectedFiles[i]);
+			loadMusic(files);
 		}
 	}
 	
+	private void loadMusic(List<File> selectedFiles) {
+		byte numberOfFilesAdded = 0;
+		for(File file : selectedFiles) {
+			if(file.getAbsolutePath().toLowerCase().endsWith("wav") || file.getAbsolutePath().toLowerCase().endsWith("mp3")) {
+				Track track = new Track(file.getAbsolutePath());
+				track.setVolume(volumeSlider.getValue() * 0.01f);
+				trackService.addTrack(track);
+				tracksListDlm.addElement(track.getTitle());
+				numberOfFilesAdded++;
+			}
+		}
+		trackService.setId(0);
+		tracksDisplay.setSelectedIndex(trackService.getId());
+		if(!playListDlm.isEmpty()) {
+			playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
+			statusField.setText("Added " + numberOfFilesAdded + ((numberOfFilesAdded > 1) ? " tracks" : " track ") + "to playlist: " + playListDisplay.getSelectedValue());
+		} else
+			statusField.setText("Added " + numberOfFilesAdded + ((numberOfFilesAdded > 1) ? " tracks" : " track"));
+	}
+
 	private void clearTracks() {
 		trackService.stop();
 		tracksListDlm.removeAllElements();
@@ -572,6 +599,11 @@ public class Display extends JFrame {
 	private void clearPlaylists() {
 		playlistService.clearPlaylists();
 		statusField.setText(playlistService.getStatus());
+	}
+
+	@Override
+	public void run() {
+		playNextOrPreviousTrack("next");
 	}
 	
 	

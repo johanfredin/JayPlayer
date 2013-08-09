@@ -48,9 +48,10 @@ public class Track {
 		return this.player;
 	}
 	
-	public void play() {
+	public void play(Runnable r) {
 		if(media != null) {
 			player.play();
+			player.onEndOfMediaProperty().setValue(r);
 			wasPlayed = true;
 		}
 	}

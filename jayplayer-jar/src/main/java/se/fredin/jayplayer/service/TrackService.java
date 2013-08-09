@@ -25,11 +25,11 @@ public class TrackService {
 		return tracks.get(id);
 	}
 	
-	public void playTrack(int id) {
+	public void playTrack(int id, Runnable r) {
 		if(!tracks.isEmpty()) {
 			this.id = id;
 			stop();
-			tracks.get(id).play();
+			tracks.get(id).play(r);
 			status = "Now playing " + tracks.get(id).getTitle();
 		}
 	}
@@ -42,10 +42,10 @@ public class TrackService {
 		}
 	}
 
-	public void nextTrack() {
+	public void nextTrack(Runnable r) {
 		if(!tracks.isEmpty()) {
 			if(shuffle) {
-				playRandomTrack();
+				playRandomTrack(r);
 				return;
 			}
 			
@@ -56,14 +56,14 @@ public class TrackService {
 			else
 				id++;
 			
-			playTrack(id);
+			playTrack(id, r);
 		}
 	}
 
-	public void previousTrack() {
+	public void previousTrack(Runnable r) {
 		if(!tracks.isEmpty()) {
 			if(shuffle) {
-				playRandomTrack();
+				playRandomTrack(r);
 				return;
 			}
 			
@@ -74,20 +74,20 @@ public class TrackService {
 			else
 				id--;
 			
-			playTrack(id);
+			playTrack(id, r);
 		}
 	}
 
-	private void playRandomTrack() {
+	private void playRandomTrack(Runnable r) {
 		int randomTrack = (int)(Math.random() * tracks.size());
 		for(Track t : tracks) {
 			if(!t.wasPlayed()) {
 				trackCount++;
-				playTrack(randomTrack);
+				playTrack(randomTrack, r);
 				break;
 			} else if(trackCount >= tracks.size() && repeat) {
 				setWasPlayed(false);
-				playTrack(randomTrack);
+				playTrack(randomTrack, r);
 				trackCount = 0;
 			} else
 				stop();
@@ -180,5 +180,7 @@ public class TrackService {
 	public void setTrackList(List<Track> tracks) {
 		this.tracks = tracks;
 	}
+
+	
 
 }
