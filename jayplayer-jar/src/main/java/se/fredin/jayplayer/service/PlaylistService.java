@@ -57,6 +57,10 @@ public class PlaylistService {
 		}
 	}
 	
+	public int getSize() {
+		return playLists.size();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<Track> getPlaylist(String id) {
 		List<String> paths = (List<String>) playLists.get(id);	// Get all the track paths from the selected list
@@ -93,10 +97,18 @@ public class PlaylistService {
 		}
 	}
 	
+	public boolean containsKey(String key) {
+		return playLists.containsKey(key);
+	}
+	
 	@SuppressWarnings({ "unchecked"})
 	public void createNewPlaylist(String nameOfPlaylist, List<Track> tracks) {
 		playListTitles.addElement(nameOfPlaylist);
 		List<String> paths = new ArrayList<String>();
+		if(!tracks.isEmpty()) {
+			for(Track track : tracks) 
+				paths.add(track.getPath());
+		}
 		playLists.put(nameOfPlaylist, paths);
 		status = "New Playlist: " + nameOfPlaylist;
 		writeToFile();

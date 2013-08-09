@@ -551,12 +551,19 @@ public class Display extends JFrame {
 		String playlistName = "";
 		try { 
 			playlistName = JOptionPane.showInputDialog("Name of playlist?");
-		} catch(NullPointerException ex) {
-			return;
-		}
+		} catch(NullPointerException ex) { return; }
 		
 		if(playlistName != "" && playlistName != null) {
-			playlistService.createNewPlaylist(playlistName, new ArrayList<Track>());
+			if(playlistService.getSize() < 1 && !tracksListDlm.isEmpty()) {
+				// If there are tracks in the display when you create your first playlist we want to add those to the track
+				playlistService.createNewPlaylist(playlistName, trackService.getTracks());
+			} else {
+				if(playlistService.containsKey(playlistName)) {
+					JOptionPane.showMessageDialog(tracksDisplay, "Playlist " + playlistName + " already exists!", "Already Exists", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				playlistService.createNewPlaylist(playlistName, new ArrayList<Track>());
+			}
 			playListDisplay.setSelectedIndex(playListDlm.getSize() - 1);
 			statusField.setText(playlistService.getStatus());
 		}
