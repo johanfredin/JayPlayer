@@ -227,6 +227,7 @@ public class Display extends JFrame {
 					switch(e.getButton()) {
 					case MouseEvent.BUTTON1:
 						trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
+						playerSettings.saveSelectedPlaylistIndex("" + playListDisplay.getSelectedIndex());
 						break;
 					case MouseEvent.BUTTON3:
 						showEditPopup(playListDisplay, e.getX(), e.getY(), "Playlist");
@@ -235,7 +236,7 @@ public class Display extends JFrame {
 				}
 			}
 		});
-		playListDisplay.setSelectedIndex(0);
+		playListDisplay.setSelectedIndex(playerSettings.loadSelectedPlaylistIndex());
 		playListDisplay.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		playListDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
 		playListDisplay.setForeground(Color.RED);
@@ -276,24 +277,18 @@ public class Display extends JFrame {
 						deleteTrack();
 						break;
 					case KeyEvent.VK_UP:
-						if(trackService.getId() > 0) 
+						if(trackService.getId() > 0) { 
 							tracksDisplay.setSelectedIndex(trackService.previousId());
+							playerSettings.saveSelectedTrackIndex("" + trackService.getId());
+						}
 						break;
 					case KeyEvent.VK_DOWN:
-						if(trackService.getId() < trackService.getTrackAmount() - 1) 
-							tracksDisplay.setSelectedIndex(trackService.nextId());
+						if(trackService.getId() < trackService.getTrackAmount() - 1) { 
+							tracksDisplay.setSelectedIndex(trackService.nextId()); 
+							playerSettings.saveSelectedTrackIndex("" + trackService.getId());
+						}
 						break;
 					}
-				}
-			}
-			
-			@Override
-			public void keyReleased(KeyEvent e) {
-				trackService.setWasPlayed(false);
-				switch(e.getKeyCode()) {
-				case KeyEvent.VK_UP : case KeyEvent.VK_DOWN:
-					playerSettings.saveSelectedIndex("" + trackService.getId());
-					break;
 				}
 			}
 		});
@@ -314,7 +309,7 @@ public class Display extends JFrame {
 			}
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				playerSettings.saveSelectedIndex("" + trackService.getId());
+				playerSettings.saveSelectedTrackIndex("" + trackService.getId());
 			}
 		});
 		tracksDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
@@ -338,6 +333,7 @@ public class Display extends JFrame {
 			
 		playerSettings.rememberUser();
 		trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
+		tracksDisplay.setSelectedIndex(playerSettings.loadSelectedTrackIndex());
 		setVisible(true);
 	}
 	
@@ -352,7 +348,7 @@ public class Display extends JFrame {
 		loadMusicItem = addMenuItemListener(MenuActions.LOAD_MUSIC); 
 		quitItem = addMenuItemListener(MenuActions.QUIT);
 		clearTracksItem = addMenuItemListener(MenuActions.CLEAR_TRACKS);
-		clearPlayListsItem = new JMenuItem("Clear Playlists");
+		clearPlayListsItem = addMenuItemListener(MenuActions.CLEAR_PLAYLISTS);
 				
 		fileMenu.add(newPlayListItem);
 		fileMenu.add(loadMusicItem);
@@ -360,42 +356,45 @@ public class Display extends JFrame {
 		menuBar.add(fileMenu);
 		
 		//TODO: Uncomment later, some weird thing with windowbuilder editor when theese are there
-//		editFileMenu.add(clearTracksItem);
-//		editFileMenu.add(clearPlayListsItem);
+		editFileMenu.add(clearTracksItem);
+		editFileMenu.add(clearPlayListsItem);
 		menuBar.add(editFileMenu);
 		
 		JMenuItem aboutItem = addMenuItemListener(MenuActions.ABOUT);
-//		helpMenu.add(aboutItem);
+		helpMenu.add(aboutItem);
 		
 		
 		menuBar.add(helpMenu);
 	}
 	
 	private void playOrStopTrack() {
-		if(playPauseButton.getIcon() == iconLoader.getIcon(iconLoader.PLAY)) {
-			tracksDisplay.setSelectedIndex(trackService.getId());
-			trackService.playTrack(trackService.getId());
-			playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
-		} else {
-			trackService.stop();
-			playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PLAY));
+		if(!tracksListDlm.isEmpty()) {
+			if(playPauseButton.getIcon() == iconLoader.getIcon(iconLoader.PLAY)) {
+				trackService.playTrack(tracksDisplay.getSelectedIndex());
+				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
+			} else {
+				trackService.stop();
+				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PLAY));
+			}
+			statusField.setText(trackService.getStatus());
 		}
-		statusField.setText(trackService.getStatus());
 	}
 	
 
 	private void playNextOrPreviousTrack(String direction) {
-		switch(direction) {
-		case "next":
-			trackService.nextTrack();
-			break;
-		case "previous":
-			trackService.previousTrack();
-			break;
+		if(!tracksListDlm.isEmpty()) {
+			switch(direction) {
+			case "next":
+				trackService.nextTrack();
+				break;
+			case "previous":
+				trackService.previousTrack();
+				break;
+			}
+			playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
+			tracksDisplay.setSelectedIndex(trackService.getId());
+			statusField.setText(trackService.getStatus());
 		}
-		playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
-		tracksDisplay.setSelectedIndex(trackService.getId());
-		statusField.setText(trackService.getStatus());
 	}
 	
 	private void deleteTrack() {
@@ -403,12 +402,15 @@ public class Display extends JFrame {
 		trackService.deleteTrack(trackService.getId());
 		statusField.setText(trackService.getStatus());
 		playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
+		playerSettings.saveSelectedTrackIndex("" + playListDisplay.getSelectedIndex());
 	}
 	
 	private void deletePlaylist() {
 		playlistService.deletePlaylist(playListDisplay.getSelectedValue());
 		trackService.clearTrackList();
+		tracksListDlm.removeAllElements();
 		playListDlm.removeElement(playListDisplay.getSelectedValue());
+		statusField.setText(playlistService.getStatus());
 	}
 	
 	private void setVolume() {
@@ -460,8 +462,10 @@ public class Display extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if(typeToEdit.equals("Playlist")) {
 					//TODO: rename playlist
-				} else
+				} else {
 					trackService.playTrack(tracksDisplay.getSelectedIndex());
+					statusField.setText(trackService.getStatus());
+				}
 			}
 		}); 
 				
@@ -474,7 +478,6 @@ public class Display extends JFrame {
 					deleteTrack();
 			}
 		}); 
-			
 		playlistPopupMenu.add(renameItem);
 		playlistPopupMenu.add(removeItem);
 		playlistPopupMenu.show(component, x, y);
@@ -502,12 +505,13 @@ public class Display extends JFrame {
 				case NEW_PLAYLIST:
 					createNewPlaylist();
 					break;
+				case CLEAR_PLAYLISTS:
+					clearPlaylists();
+					break;
 				default:
 					break;
 				}
 			}
-
-			
 		});
 		return item;
 	}
@@ -527,8 +531,11 @@ public class Display extends JFrame {
 			}
 			trackService.setId(0);
 			tracksDisplay.setSelectedIndex(trackService.getId());
-			playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
-			statusField.setText("Added " + trackService.getTrackAmount() + " tracks");
+			if(!playListDlm.isEmpty()) {
+				playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
+				statusField.setText("Added " + trackService.getTrackAmount() + ((trackService.getTrackAmount() > 1) ? " tracks" : " track ") + "to playlist: " + playListDisplay.getSelectedValue());
+			} else
+				statusField.setText("Added " + trackService.getTrackAmount() + ((trackService.getTrackAmount() > 1) ? " tracks" : " track"));
 		}
 	}
 	
@@ -537,18 +544,27 @@ public class Display extends JFrame {
 		tracksListDlm.removeAllElements();
 		trackService.clearTrackList();
 		statusField.setText(trackService.getStatus());
+		playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
 	}
 
 	private void createNewPlaylist() {
 		String playlistName = "";
 		try { 
 			playlistName = JOptionPane.showInputDialog("Name of playlist?");
-		} catch(NullPointerException ex) {}
+		} catch(NullPointerException ex) {
+			return;
+		}
 		
-		if(playlistName != "") {
+		if(playlistName != "" && playlistName != null) {
 			playlistService.createNewPlaylist(playlistName, new ArrayList<Track>());
 			playListDisplay.setSelectedIndex(playListDlm.getSize() - 1);
+			statusField.setText(playlistService.getStatus());
 		}
+	}
+	
+	private void clearPlaylists() {
+		playlistService.clearPlaylists();
+		statusField.setText(playlistService.getStatus());
 	}
 	
 	

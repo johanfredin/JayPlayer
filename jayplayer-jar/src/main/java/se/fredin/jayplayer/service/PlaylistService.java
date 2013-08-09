@@ -19,12 +19,17 @@ public class PlaylistService {
 	private File JSONFile;
 	private JSONObject playLists;
 	private DefaultListModel<String> playListTitles, trackTitles;
+	private String status;
 			
 	public PlaylistService() {
 		JSONFile = new File(System.getProperty("user.home") + "/playlists.JSON");
 		playLists = new JSONObject();
 		playListTitles = new DefaultListModel<String>();
 		trackTitles = new DefaultListModel<String>();
+	}
+	
+	public String getStatus() {
+		return this.status;
 	}
 	
 	/**
@@ -64,6 +69,7 @@ public class PlaylistService {
 				trackTitles.addElement(track.getTitle());
 			}
 		}
+		status = "Current Playlist: " + id;
 		return tracks;
 	}
 
@@ -92,6 +98,7 @@ public class PlaylistService {
 		playListTitles.addElement(nameOfPlaylist);
 		List<String> paths = new ArrayList<String>();
 		playLists.put(nameOfPlaylist, paths);
+		status = "New Playlist: " + nameOfPlaylist;
 		writeToFile();
 	}
 	
@@ -101,15 +108,24 @@ public class PlaylistService {
 		for(Track t : tracks) 
 			paths.add(t.getPath());
 		playLists.put(nameOfPlaylist, paths);
+		status = "Updated Playlist: " + nameOfPlaylist;
 		writeToFile();
 	}
 	
 	public void deletePlaylist(String id) {
 		trackTitles.removeElement(id);
 		playLists.remove(id);
+		status = "Removed Playlist: " + id;
 		writeToFile();
 	}
 
+	public void clearPlaylists() {
+		playLists.clear();
+		playListTitles.removeAllElements();
+		trackTitles.removeAllElements();
+		status = "Removed all playlists";
+		writeToFile();
+	}
 		
 	public DefaultListModel<String> getPlayListNames() {
 		return this.playListTitles;

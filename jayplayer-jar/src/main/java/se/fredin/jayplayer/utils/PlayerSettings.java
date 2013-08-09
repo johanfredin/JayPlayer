@@ -48,8 +48,14 @@ public class PlayerSettings {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void saveSelectedIndex(String index) {
+	public void saveSelectedTrackIndex(String index) {
 		settingsObject.put("currentIndex", index);
+		writeToFile();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void saveSelectedPlaylistIndex(String index) {
+		settingsObject.put("currentPlaylistIndex", index);
 		writeToFile();
 	}
 	
@@ -114,10 +120,19 @@ public class PlayerSettings {
 		return "repeat";
 	}
 
-	public int loadSelectedIndex() {
+	public int loadSelectedTrackIndex() {
 		String settings = null;
 		try {
 			settings = getFromFile("currentIndex").toString();
+			return Integer.parseInt(settings);
+		} catch(NullPointerException ex) {}
+		return 0;
+	}
+	
+	public int loadSelectedPlaylistIndex() {
+		String settings = null;
+		try {
+			settings = getFromFile("currentPlaylistIndex").toString();
 			return Integer.parseInt(settings);
 		} catch(NullPointerException ex) {}
 		return 0;
