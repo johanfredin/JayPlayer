@@ -8,8 +8,9 @@ public enum MenuActions {
 	QUIT("Quit"),
 	CLEAR_TRACKS("Clear Tracks"),
 	CLEAR_PLAYLISTS("Clear Playlists"),
-	ABOUT("About");
-	
+	ABOUT("About"),
+	EQUALIZER("Equalizer");
+		
 	private String actionName;
 	
 	MenuActions(String actionName) {

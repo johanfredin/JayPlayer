@@ -51,6 +51,7 @@ public class Track {
 	public void play(Runnable r) {
 		if(media != null) {
 			player.play();
+			System.out.println(player.getCycleCount());
 			player.onEndOfMediaProperty().setValue(r);
 			wasPlayed = true;
 		}
@@ -58,6 +59,14 @@ public class Track {
 	
 	public void stop() {
 		player.stop();
+	}
+	
+	public void setBalance(float balance) {
+		player.setBalance(balance);
+	}
+	
+	public void setPlayBackRate(float playBackRate) {
+		player.setRate(playBackRate);
 	}
 	
 	public void setId(int id) {

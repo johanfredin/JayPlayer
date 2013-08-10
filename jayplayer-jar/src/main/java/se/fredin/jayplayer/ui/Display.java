@@ -66,7 +66,7 @@ public class Display extends JFrame implements Runnable {
 	private JSlider volumeSlider;
 	private JProgressBar progressBar;
 	private JMenuItem newPlayListItem, loadMusicItem, quitItem;
-	private JMenuItem clearTracksItem, clearPlayListsItem;
+	private JMenuItem clearTracksItem, clearPlayListsItem, equalizerItem;
 	private JTextField statusField;
 	private JButton previousButton, playPauseButton, nextButton;
 	private JButton shuffleButton, repeatButton;
@@ -367,12 +367,14 @@ public class Display extends JFrame implements Runnable {
 		quitItem = addMenuItemListener(MenuActions.QUIT);
 		clearTracksItem = addMenuItemListener(MenuActions.CLEAR_TRACKS);
 		clearPlayListsItem = addMenuItemListener(MenuActions.CLEAR_PLAYLISTS);
+		equalizerItem = addMenuItemListener(MenuActions.EQUALIZER);
 		fileMenu.add(newPlayListItem);
 		fileMenu.add(loadMusicItem);
 		fileMenu.add(quitItem);
 		menuBar.add(fileMenu);
 		
 		//TODO: Uncomment later, some weird thing with window builder editor when these are there
+		editFileMenu.add(equalizerItem);
 		editFileMenu.add(clearTracksItem);
 		editFileMenu.add(clearPlayListsItem);
 		menuBar.add(editFileMenu);
@@ -522,6 +524,9 @@ public class Display extends JFrame implements Runnable {
 					break;
 				case CLEAR_PLAYLISTS:
 					clearPlaylists();
+					break;
+				case EQUALIZER:
+					new Equalizer(trackService);
 					break;
 				default:
 					break;

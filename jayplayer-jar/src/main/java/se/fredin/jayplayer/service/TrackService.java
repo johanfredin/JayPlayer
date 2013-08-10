@@ -33,6 +33,18 @@ public class TrackService {
 			status = "Now playing " + tracks.get(id).getTitle();
 		}
 	}
+	
+	public void setPlayBackRate(float playBackRate) {
+		for(Track track : tracks)
+			track.setPlayBackRate(playBackRate);
+	}
+	
+	public void setBalance(float balance) {
+		for(Track track : tracks)
+			track.setBalance(balance);
+	}
+	
+	
 
 	public void stop() {
 		if(!tracks.isEmpty()) {
