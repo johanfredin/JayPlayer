@@ -20,7 +20,6 @@ import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -42,14 +41,13 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
 import se.fredin.jayplayer.domain.Track;
 import se.fredin.jayplayer.service.PlaylistService;
 import se.fredin.jayplayer.service.TrackService;
 import se.fredin.jayplayer.utils.IconLoader;
 import se.fredin.jayplayer.utils.PlayerSettings;
-
 import javax.swing.JPopupMenu;
+import java.awt.Toolkit;
 
 
 public class Display extends JFrame implements Runnable {
@@ -73,6 +71,7 @@ public class Display extends JFrame implements Runnable {
 	private JLabel timeLabel, totalDuration;
 	
 	public Display(final TrackService trackService) {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Display.class.getResource("/res/desktop_small.png")));
 		this.trackService = trackService;
 		this.playerSettings = new PlayerSettings();
 		this.iconLoader = new IconLoader();

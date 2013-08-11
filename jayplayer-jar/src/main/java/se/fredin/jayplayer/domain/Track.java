@@ -51,7 +51,7 @@ public class Track {
 	public void play(Runnable r) {
 		if(media != null) {
 			player.play();
-			System.out.println(player.getCycleCount());
+			System.out.println(player.getRate());
 			player.onEndOfMediaProperty().setValue(r);
 			wasPlayed = true;
 		}
@@ -100,6 +100,7 @@ public class Track {
 	public boolean wasPlayed() {
 		return this.wasPlayed;
 	}
+	
 	public void setWasPlayed(boolean wasPlayed) {
 		if(media != null)
 			this.wasPlayed = wasPlayed;

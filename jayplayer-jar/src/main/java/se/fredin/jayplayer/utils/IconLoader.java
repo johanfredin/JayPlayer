@@ -9,8 +9,7 @@ public class IconLoader {
 	
 	private final String PATH = "/res/";
 	private Map<String, ImageIcon> iconsMap;
-	
-		
+			
 	public final String BACKWARDS = "backwards";
 	public final String FORWARD = "forward";
 	public final String PAUSE = "pause";
@@ -30,6 +29,7 @@ public class IconLoader {
 		iconsMap.put(REPEAT_ENABLED, new ImageIcon(IconLoader.class.getResource(PATH + "repeatEnabled.png")));
 		iconsMap.put(SHUFFLE, new ImageIcon(IconLoader.class.getResource(PATH + "shuffle.png")));
 		iconsMap.put(SHUFFLE_ENABLED, new ImageIcon(IconLoader.class.getResource(PATH + "shuffleEnabled.png")));
+
 	}
 	
 	public String getPath(String icon) {
