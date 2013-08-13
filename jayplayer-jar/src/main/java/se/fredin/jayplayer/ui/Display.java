@@ -20,6 +20,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -41,12 +42,16 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
 import se.fredin.jayplayer.domain.Track;
 import se.fredin.jayplayer.service.PlaylistService;
 import se.fredin.jayplayer.service.TrackService;
 import se.fredin.jayplayer.utils.IconLoader;
+import se.fredin.jayplayer.utils.MenuActions;
 import se.fredin.jayplayer.utils.PlayerSettings;
+
 import javax.swing.JPopupMenu;
+
 import java.awt.Toolkit;
 
 
@@ -129,7 +134,6 @@ public class Display extends JFrame implements Runnable {
 			public void mouseClicked(MouseEvent e) {
 				setVolume();
 			}
-			
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				playerSettings.saveVolumeSettings("" + volumeSlider.getValue() * 0.01f);
@@ -218,8 +222,20 @@ public class Display extends JFrame implements Runnable {
 			public void keyPressed(KeyEvent e) {
 				if(!playListDlm.isEmpty()) {
 					switch(e.getKeyCode()) {
-					case KeyEvent.VK_DELETE:
+					case KeyEvent.VK_DELETE : case KeyEvent.VK_BACK_SPACE:
 						deletePlaylist();
+						break;
+					}
+				}
+			}
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if(!playListDlm.isEmpty()) {
+					switch(e.getKeyCode()) {
+					case KeyEvent.VK_UP : case KeyEvent.VK_DOWN:
+						trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
+						playerSettings.saveSelectedPlaylistIndex("" + playListDisplay.getSelectedIndex());
+						break;
 					}
 				}
 			}
@@ -233,7 +249,8 @@ public class Display extends JFrame implements Runnable {
 						trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
 						playerSettings.saveSelectedPlaylistIndex("" + playListDisplay.getSelectedIndex());
 						break;
-					case MouseEvent.BUTTON3:
+					case MouseEvent.BUTTON2 : case MouseEvent.BUTTON3:
+						playListDisplay.setSelectedIndex(playListDisplay.locationToIndex(e.getPoint()));
 						showEditPopup(playListDisplay, e.getX(), e.getY(), "Playlist");
 						break;
 					}
@@ -242,7 +259,7 @@ public class Display extends JFrame implements Runnable {
 		});
 		playListDisplay.setSelectedIndex(playerSettings.loadSelectedPlaylistIndex());
 		playListDisplay.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		playListDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
+		playListDisplay.setFont(new Font("Dialog", Font.PLAIN, 13));
 		playListDisplay.setForeground(Color.RED);
 		playListDisplay.setBackground(new Color(0, 0, 0));
 		playListDisplay.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -306,14 +323,20 @@ public class Display extends JFrame implements Runnable {
 						trackService.playTrack(trackService.getId(), Display.this);
 						statusField.setText(trackService.getStatus());
 					}
-					else if(e.getButton() == MouseEvent.BUTTON3) {
-						showEditPopup(tracksDisplay, e.getX(), e.getY(), "tracks");
-					}
 				}
 			}
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				playerSettings.saveSelectedTrackIndex("" + trackService.getId());
+				if(!trackService.isEmpty()) {
+					switch(e.getButton()) {
+					case MouseEvent.BUTTON2 : case MouseEvent.BUTTON3:
+						showEditPopup(tracksDisplay, e.getX(), e.getY(), "tracks");
+						tracksDisplay.setSelectedIndex(tracksDisplay.locationToIndex(e.getPoint()));
+						trackService.setId(tracksDisplay.getSelectedIndex());
+						break;
+					}
+					playerSettings.saveSelectedTrackIndex("" + trackService.getId());
+				}
 			}
 		});
 		tracksDisplay.setDropTarget(new DropTarget(){
@@ -330,7 +353,7 @@ public class Display extends JFrame implements Runnable {
 				}
 			}
 		});
-		tracksDisplay.setFont(new Font("Impact", Font.PLAIN, 12));
+		tracksDisplay.setFont(new Font("Dialog", Font.PLAIN, 13));
 		tracksDisplay.setBackground(new Color(0, 0, 0));
 		tracksDisplay.setForeground(new Color(0, 255, 0));
 		tracksDisplay.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -343,7 +366,7 @@ public class Display extends JFrame implements Runnable {
 		
 		statusField = new JTextField();
 		statusField.setHorizontalAlignment(SwingConstants.CENTER);
-		statusField.setFont(new Font("Dialog", Font.PLAIN, 12));
+		statusField.setFont(new Font("Dialog", Font.PLAIN, 13));
 		statusField.setEditable(false);
 		statusField.setText("Welcome" + playerSettings.loadIsBack() + System.getProperty("user.name").toUpperCase() + "!");
 		topPanel.add(statusField);

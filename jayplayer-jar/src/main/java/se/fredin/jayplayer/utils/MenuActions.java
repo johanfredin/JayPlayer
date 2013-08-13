@@ -1,4 +1,4 @@
-package se.fredin.jayplayer.ui;
+package se.fredin.jayplayer.utils;
 
 public enum MenuActions {
 	
