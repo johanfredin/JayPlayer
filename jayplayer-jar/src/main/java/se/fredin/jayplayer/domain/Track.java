@@ -51,7 +51,6 @@ public class Track {
 	public void play(Runnable r) {
 		if(media != null) {
 			player.play();
-			System.out.println(player.getRate());
 			player.onEndOfMediaProperty().setValue(r);
 			wasPlayed = true;
 		}
