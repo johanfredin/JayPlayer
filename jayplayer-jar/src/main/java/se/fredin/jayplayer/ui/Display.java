@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -33,6 +34,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -46,13 +48,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import se.fredin.jayplayer.domain.Track;
 import se.fredin.jayplayer.service.PlaylistService;
 import se.fredin.jayplayer.service.TrackService;
+import se.fredin.jayplayer.utils.Formatter;
 import se.fredin.jayplayer.utils.IconLoader;
 import se.fredin.jayplayer.utils.MenuActions;
 import se.fredin.jayplayer.utils.PlayerSettings;
-
-import javax.swing.JPopupMenu;
-
-import java.awt.Toolkit;
 
 
 public class Display extends JFrame implements Runnable {
@@ -61,6 +60,7 @@ public class Display extends JFrame implements Runnable {
 	private PlayerSettings playerSettings;
 	private PlaylistService playlistService;
 	private IconLoader iconLoader;
+	private Formatter formatter;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -68,12 +68,11 @@ public class Display extends JFrame implements Runnable {
 	private JList<String> tracksDisplay, playListDisplay;
 	private JSlider volumeSlider;
 	private JProgressBar progressBar;
-	private JMenuItem newPlayListItem, loadMusicItem, quitItem;
-	private JMenuItem clearTracksItem, clearPlayListsItem, equalizerItem;
 	private JTextField statusField;
 	private JButton previousButton, playPauseButton, nextButton;
 	private JButton shuffleButton, repeatButton;
 	private JLabel timeLabel, totalDuration;
+		
 	
 	public Display(final TrackService trackService) {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Display.class.getResource("/res/desktop_small.png")));
@@ -81,6 +80,7 @@ public class Display extends JFrame implements Runnable {
 		this.playerSettings = new PlayerSettings();
 		this.iconLoader = new IconLoader();
 		this.playlistService = new PlaylistService();
+		this.formatter = new Formatter();
 		
 		setTitle("JayPlayer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -292,6 +292,7 @@ public class Display extends JFrame implements Runnable {
 					case KeyEvent.VK_ENTER:
 						trackService.playTrack(trackService.getId(), Display.this);
 						playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
+						updateTimeLabels();
 						statusField.setText(trackService.getStatus());
 						break;
 					case KeyEvent.VK_DELETE:
@@ -321,6 +322,7 @@ public class Display extends JFrame implements Runnable {
 					if(e.getClickCount() >= 2) {
 						playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
 						trackService.playTrack(trackService.getId(), Display.this);
+						updateTimeLabels();
 						statusField.setText(trackService.getStatus());
 					}
 				}
@@ -384,18 +386,17 @@ public class Display extends JFrame implements Runnable {
 		JMenu fileMenu = new JMenu("File");
 		JMenu editFileMenu = new JMenu("Edit");
 		JMenu helpMenu = new JMenu("Help");
-		newPlayListItem = addMenuItemListener(MenuActions.NEW_PLAYLIST);
-		loadMusicItem = addMenuItemListener(MenuActions.LOAD_MUSIC); 
-		quitItem = addMenuItemListener(MenuActions.QUIT);
-		clearTracksItem = addMenuItemListener(MenuActions.CLEAR_TRACKS);
-		clearPlayListsItem = addMenuItemListener(MenuActions.CLEAR_PLAYLISTS);
-		equalizerItem = addMenuItemListener(MenuActions.EQUALIZER);
+		JMenuItem newPlayListItem = addMenuItemListener(MenuActions.NEW_PLAYLIST);
+		JMenuItem	loadMusicItem = addMenuItemListener(MenuActions.LOAD_MUSIC); 
+		JMenuItem quitItem = addMenuItemListener(MenuActions.QUIT);
+		JMenuItem clearTracksItem = addMenuItemListener(MenuActions.CLEAR_TRACKS);
+		JMenuItem clearPlayListsItem = addMenuItemListener(MenuActions.CLEAR_PLAYLISTS);
+		JMenuItem equalizerItem = addMenuItemListener(MenuActions.EQUALIZER);
 		fileMenu.add(newPlayListItem);
 		fileMenu.add(loadMusicItem);
 		fileMenu.add(quitItem);
 		menuBar.add(fileMenu);
 		
-		//TODO: Uncomment later, some weird thing with window builder editor when these are there
 		editFileMenu.add(equalizerItem);
 		editFileMenu.add(clearTracksItem);
 		editFileMenu.add(clearPlayListsItem);
@@ -406,11 +407,14 @@ public class Display extends JFrame implements Runnable {
 		menuBar.add(helpMenu);
 	}
 	
+	
+	
 	private void playOrStopTrack() {
 		if(!tracksListDlm.isEmpty()) {
 			if(playPauseButton.getIcon() == iconLoader.getIcon(iconLoader.PLAY)) {
 				trackService.playTrack(tracksDisplay.getSelectedIndex(), Display.this);
 				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
+				updateTimeLabels();
 			} else {
 				trackService.stop();
 				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PLAY));
@@ -432,6 +436,7 @@ public class Display extends JFrame implements Runnable {
 			}
 			playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
 			tracksDisplay.setSelectedIndex(trackService.getId());
+			updateTimeLabels();
 			statusField.setText(trackService.getStatus());
 		}
 	}
@@ -503,6 +508,7 @@ public class Display extends JFrame implements Runnable {
 					//TODO: rename playlist
 				} else {
 					trackService.playTrack(tracksDisplay.getSelectedIndex(), Display.this);
+					updateTimeLabels();
 					statusField.setText(trackService.getStatus());
 				}
 			}
@@ -633,7 +639,40 @@ public class Display extends JFrame implements Runnable {
 		playNextOrPreviousTrack("next");
 	}
 	
-	
+	/**
+	 * Will tick every second and update the current time until track is stopped or finished
+	 */
+	public void updateTimeLabels() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				totalDuration.setText(formatter.format(trackService.getTotalTime(tracksDisplay.getSelectedIndex()), 2));
+				try {
+					while(!trackService.isStopTimer()) {
+						timeLabel.setText(formatter.format(trackService.getCurrentTime(tracksDisplay.getSelectedIndex()), 2));
+						Thread.sleep(1000);
+					}
+				} catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}).start();
+		
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				progressBar.setMaximum((int) (trackService.getTotalTime(tracksDisplay.getSelectedIndex()) * 10000));
+				try {
+					while(!trackService.isStopTimer()) {
+						progressBar.setValue((int) (trackService.getCurrentTime(tracksDisplay.getSelectedIndex()) * 10000));
+						Thread.sleep(100);
+					}
+				} catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}).start();
+	}
 	
 	
 	

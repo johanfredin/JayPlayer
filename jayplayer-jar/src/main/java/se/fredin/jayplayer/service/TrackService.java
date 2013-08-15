@@ -3,7 +3,6 @@ package se.fredin.jayplayer.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.util.Duration;
 import se.fredin.jayplayer.domain.Track;
 
 public class TrackService {
@@ -12,6 +11,7 @@ public class TrackService {
 	private int id;
 	private boolean repeat;
 	private boolean shuffle;
+	private boolean stopTimer;
 	private String status;
 	private int trackCount;
 	
@@ -30,6 +30,7 @@ public class TrackService {
 			this.id = id;
 			stop();
 			tracks.get(id).play(r);
+			stopTimer = false;
 			status = "Now playing " + tracks.get(id).getTitle();
 		}
 	}
@@ -50,6 +51,7 @@ public class TrackService {
 		if(!tracks.isEmpty()) {
 			for(Track t : tracks)
 				t.stop();
+			stopTimer = true;
 			status = "Stopped All Music";
 		}
 	}
@@ -169,11 +171,11 @@ public class TrackService {
 		return this.status;
 	}
 
-	public Duration getCurrentTime(int id) {
+	public double getCurrentTime(int id) {
 		return tracks.get(id).getCurrentTime();
 	}
 	
-	public Duration getTotalTime(int id) {
+	public double getTotalTime(int id) {
 		return tracks.get(id).getTotalTime();
 	}
 	
@@ -192,6 +194,15 @@ public class TrackService {
 	public void setTrackList(List<Track> tracks) {
 		this.tracks = tracks;
 	}
+	
+	public double getTimeRemaining(int id) {
+		return tracks.get(id).getTimeRemaining();
+	}
+	
+	public boolean isStopTimer() {
+		return this.stopTimer;
+	}
+	
 
 	
 

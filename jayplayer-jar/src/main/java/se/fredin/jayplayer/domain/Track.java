@@ -3,7 +3,6 @@ package se.fredin.jayplayer.domain;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
 
 public class Track {
 	
@@ -88,12 +87,12 @@ public class Track {
 		return 1;
 	}
 	
-	public Duration getCurrentTime() {
-		return player.getCurrentTime();
+	public double getCurrentTime() {
+		return player.getCurrentTime().toMinutes();
 	}
 	
-	public Duration getTotalTime() {
-		return player.getTotalDuration();
+	public double getTotalTime() {
+		return player.getTotalDuration().toMinutes();
 	}
 	
 	public boolean wasPlayed() {
@@ -105,6 +104,10 @@ public class Track {
 			this.wasPlayed = wasPlayed;
 	}
 	
-
+	public double getTimeRemaining() {
+		return getTotalTime() * getCurrentTime();
+	}
+	
+	
 	
 }

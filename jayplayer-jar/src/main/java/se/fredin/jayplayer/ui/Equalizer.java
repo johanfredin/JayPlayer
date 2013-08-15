@@ -84,7 +84,7 @@ public class Equalizer extends JFrame {
 		
 		resetButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				balanceSlider.setValue(50);
+				balanceSlider.setValue(0);
 				playBackRateSlider.setValue(10);
 				trackService.setBalance(balanceSlider.getValue() * 0.01f);
 				trackService.setPlayBackRate(playBackRateSlider.getValue() * 0.1f);
