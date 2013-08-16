@@ -27,6 +27,7 @@ public class AboutWindow extends JFrame {
 	public AboutWindow() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(AboutWindow.class.getResource("/res/desktop_small.png")));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setResizable(false);
 		setTitle("About");
 		setBounds(100, 100, 409, 244);
 		contentPane = new JPanel();

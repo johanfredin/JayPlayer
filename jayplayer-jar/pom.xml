@@ -16,8 +16,6 @@
 		<java-version>1.7</java-version>
 		<sourceEncoding>UTF-8</sourceEncoding>
 		<jayplayer-version>1.0-SNAPSHOT</jayplayer-version>
-		<org.springframework-version>3.2.1.RELEASE</org.springframework-version>
-		<log4j.version>1.2.17</log4j.version>
 	</properties>
 
 	<build>
@@ -35,15 +33,6 @@
 		</plugins>
 	</build>
 
-	<repositories>
-		<repository>
-			<id>springsource-repo</id>
-			<name>SpringSource Repository</name>
-			<url>http://repo.springsource.org/release</url>
-		</repository>
-	</repositories>
-
-
 	<dependencies>
 
 		<dependency>
@@ -52,14 +41,6 @@
 			<version>4.5</version>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>${log4j.version}</version>
-		</dependency>
-
-
 
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>

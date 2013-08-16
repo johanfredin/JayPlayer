@@ -138,6 +138,12 @@ public class PlaylistService {
 		status = "Removed all playlists";
 		writeToFile();
 	}
+	
+	public boolean isSelectedPlaylistEmpty(String id) {
+		@SuppressWarnings("unchecked")
+		List<String> list = (List<String>) playLists.get(id);
+		return list.isEmpty();
+	}
 		
 	public DefaultListModel<String> getPlayListNames() {
 		return this.playListTitles;

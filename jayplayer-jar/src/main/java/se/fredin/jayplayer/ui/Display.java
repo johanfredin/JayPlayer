@@ -221,6 +221,8 @@ public class Display extends JFrame implements Runnable {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if(!playListDlm.isEmpty()) {
+					resetTimer();
+					trackService.stop();
 					switch(e.getKeyCode()) {
 					case KeyEvent.VK_DELETE : case KeyEvent.VK_BACK_SPACE:
 						deletePlaylist();
@@ -244,6 +246,8 @@ public class Display extends JFrame implements Runnable {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(!playListDlm.isEmpty()) {
+					trackService.stop();
+					resetTimer();
 					switch(e.getButton()) {
 					case MouseEvent.BUTTON1:
 						trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
@@ -290,8 +294,8 @@ public class Display extends JFrame implements Runnable {
 				if(!trackService.isEmpty()) {
 					switch(e.getKeyCode()) {
 					case KeyEvent.VK_ENTER:
-						trackService.playTrack(trackService.getId(), Display.this);
 						playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
+						trackService.playTrack(trackService.getId(), Display.this);
 						updateTimeLabels();
 						statusField.setText(trackService.getStatus());
 						break;
@@ -417,14 +421,22 @@ public class Display extends JFrame implements Runnable {
 				updateTimeLabels();
 			} else {
 				trackService.stop();
+				resetTimer();
 				playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PLAY));
 			}
 			statusField.setText(trackService.getStatus());
 		}
 	}
 	
+	private void resetTimer() {
+		timeLabel.setText("0.00");
+		totalDuration.setText("0.00");
+		progressBar.setValue(0);
+	}
 
 	private void playNextOrPreviousTrack(String direction) {
+		trackService.stop();
+		try { Thread.sleep(100); } catch(Exception ex) {}
 		if(!tracksListDlm.isEmpty()) {
 			switch(direction) {
 			case "next":
@@ -508,6 +520,7 @@ public class Display extends JFrame implements Runnable {
 					//TODO: rename playlist
 				} else {
 					trackService.playTrack(tracksDisplay.getSelectedIndex(), Display.this);
+					playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
 					updateTimeLabels();
 					statusField.setText(trackService.getStatus());
 				}
@@ -643,28 +656,16 @@ public class Display extends JFrame implements Runnable {
 	 * Will tick every second and update the current time until track is stopped or finished
 	 */
 	public void updateTimeLabels() {
+		final int INDEX = tracksDisplay.getSelectedIndex();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				totalDuration.setText(formatter.format(trackService.getTotalTime(tracksDisplay.getSelectedIndex()), 2));
+				totalDuration.setText(formatter.format(trackService.getTotalTime(INDEX), 2));
+				progressBar.setMaximum((int) (trackService.getTotalTime(INDEX) * 10000));
 				try {
 					while(!trackService.isStopTimer()) {
-						timeLabel.setText(formatter.format(trackService.getCurrentTime(tracksDisplay.getSelectedIndex()), 2));
-						Thread.sleep(1000);
-					}
-				} catch(Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		}).start();
-		
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				progressBar.setMaximum((int) (trackService.getTotalTime(tracksDisplay.getSelectedIndex()) * 10000));
-				try {
-					while(!trackService.isStopTimer()) {
-						progressBar.setValue((int) (trackService.getCurrentTime(tracksDisplay.getSelectedIndex()) * 10000));
+						timeLabel.setText(formatter.format(trackService.getCurrentTime(INDEX), 2));
+						progressBar.setValue((int) (trackService.getCurrentTime(INDEX) * 10000));
 						Thread.sleep(100);
 					}
 				} catch(Exception ex) {
@@ -672,6 +673,8 @@ public class Display extends JFrame implements Runnable {
 				}
 			}
 		}).start();
+		
+		
 	}
 	
 	

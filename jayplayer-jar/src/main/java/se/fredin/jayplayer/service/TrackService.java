@@ -29,6 +29,11 @@ public class TrackService {
 		if(!tracks.isEmpty()) {
 			this.id = id;
 			stop();
+			try { 
+				Thread.sleep(100); 
+			} catch(Exception ex) {
+				ex.printStackTrace();
+			}
 			tracks.get(id).play(r);
 			stopTimer = false;
 			status = "Now playing " + tracks.get(id).getTitle();
