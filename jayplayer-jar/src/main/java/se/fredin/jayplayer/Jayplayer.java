@@ -6,7 +6,7 @@ import se.fredin.jayplayer.ui.Display;
 
 public class Jayplayer {
 	
-	public static final String JAYPLAYER_VERSION = "0.5";
+	public static final String JAYPLAYER_VERSION = "0.9";
 	
 	public static void main(String[] args) {
 		TrackService service = new TrackService();

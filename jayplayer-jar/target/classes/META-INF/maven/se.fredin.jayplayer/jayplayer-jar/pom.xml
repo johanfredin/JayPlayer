@@ -9,13 +9,15 @@
 	<artifactId>jayplayer-jar</artifactId>
 	<packaging>jar</packaging>
 	<name>jayplayer-jar</name>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.9</version>
 	<url>http://maven.apache.org</url>
 
 	<properties>
+		<source-endocing>UTF8)</source-endocing>
 		<java-version>1.7</java-version>
-		<sourceEncoding>UTF-8</sourceEncoding>
 		<jayplayer-version>1.0-SNAPSHOT</jayplayer-version>
+		<jfxpath>/home/johan/oracle java/jre/lib/jfxrt.jar</jfxpath>
+		<respath>/home/johan/workspace/MediaPlayer/JayPlayer_Resources.jar</respath>
 	</properties>
 
 	<build>
@@ -30,11 +32,24 @@
 					<encoding>${sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>se.fredin.jayplayer.Jayplayer</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
-
+	
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -45,7 +60,23 @@
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
-			<version>1.1</version>
+			<version>1.1.1</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>javafx</artifactId>
+			<version>2.2.25</version>
+			<scope>system</scope>
+			<systemPath>${jfxpath}</systemPath>
+		</dependency>
+		
+		<dependency>
+			<groupId>se.fredin</groupId>
+			<artifactId>jayplayer_resources</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${respath}</systemPath>
 		</dependency>
 
 
