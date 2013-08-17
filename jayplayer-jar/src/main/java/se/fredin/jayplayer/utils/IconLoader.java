@@ -7,7 +7,6 @@ import javax.swing.ImageIcon;
 
 public class IconLoader {
 	
-	private final String PATH = "/res/";
 	private Map<String, ImageIcon> iconsMap;
 			
 	public final String BACKWARDS = "backwards";
@@ -21,19 +20,18 @@ public class IconLoader {
 	
 	public IconLoader() {
 		iconsMap = new HashMap<String, ImageIcon>();
-		iconsMap.put(BACKWARDS, new ImageIcon(IconLoader.class.getResource(PATH + "backwards.png")));
-		iconsMap.put(FORWARD, new ImageIcon(IconLoader.class.getResource(PATH + "forward.png")));
-		iconsMap.put(PAUSE, new ImageIcon(IconLoader.class.getResource(PATH + "pause.png")));
-		iconsMap.put(PLAY, new ImageIcon(IconLoader.class.getResource(PATH + "play.png")));
-		iconsMap.put(REPEAT, new ImageIcon(IconLoader.class.getResource(PATH + "repeat.png")));
-		iconsMap.put(REPEAT_ENABLED, new ImageIcon(IconLoader.class.getResource(PATH + "repeatEnabled.png")));
-		iconsMap.put(SHUFFLE, new ImageIcon(IconLoader.class.getResource(PATH + "shuffle.png")));
-		iconsMap.put(SHUFFLE_ENABLED, new ImageIcon(IconLoader.class.getResource(PATH + "shuffleEnabled.png")));
-
+		iconsMap.put(BACKWARDS, get("backwards.png"));
+		iconsMap.put(FORWARD, get("forward.png"));
+		iconsMap.put(PAUSE, get("pause.png"));
+		iconsMap.put(PLAY, get("play.png"));
+		iconsMap.put(REPEAT, get("repeat.png"));
+		iconsMap.put(REPEAT_ENABLED, get("repeatEnabled.png"));
+		iconsMap.put(SHUFFLE, get("shuffle.png"));
+		iconsMap.put(SHUFFLE_ENABLED, get("shuffleEnabled.png"));
 	}
 	
-	public String getPath(String icon) {
-		return PATH + icon + ".png";
+	private ImageIcon get(String path) {
+		return new ImageIcon(IconLoader.class.getResource("/res/" + path));
 	}
 	
 	public ImageIcon getIcon(String key) {

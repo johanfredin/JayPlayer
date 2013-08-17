@@ -8,12 +8,11 @@
 	<groupId>se.fredin.jayplayer</groupId>
 	<artifactId>jayplayer-jar</artifactId>
 	<packaging>jar</packaging>
-	<name>jayplayer-jar</name>
+	<name>JayPlayer</name>
 	<version>0.9</version>
-	<url>http://maven.apache.org</url>
+	<url>https://github.com/johanfredin/JayPlayer</url>
 
 	<properties>
-		<source-endocing>UTF8)</source-endocing>
 		<java-version>1.7</java-version>
 		<jayplayer-version>1.0-SNAPSHOT</jayplayer-version>
 		<jfxpath>/home/johan/oracle java/jre/lib/jfxrt.jar</jfxpath>
@@ -29,11 +28,10 @@
 				<configuration>
 					<source>${java-version}</source>
 					<target>${java-version}</target>
-					<encoding>${sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
-			
-			<plugin>
+
+ 		<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.4</version>
@@ -45,11 +43,39 @@
 					</archive>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.dstovall</groupId>
+				<artifactId>onejar-maven-plugin</artifactId>
+				<version>1.4.4</version>
+				<executions>
+					<execution>
+						<configuration>
+							<archive>
+						<manifest>
+							<mainClass>se.fredin.jayplayer.Jayplayer</mainClass>
+						</manifest>
+					</archive>
+							<!-- Optional -->
+							<onejarVersion>0.97</onejarVersion>
+							
+							<!-- Optional, default is false -->
+							<attachToBuild>true</attachToBuild>
+							
+						</configuration>
+						<goals>
+							<goal>one-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
 		</plugins>
 	</build>
 
 	<dependencies>
-	
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -62,7 +88,7 @@
 			<artifactId>json-simple</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>javafx</artifactId>
@@ -79,7 +105,13 @@
 			<systemPath>${respath}</systemPath>
 		</dependency>
 
-
 	</dependencies>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>onejar-maven-plugin.googlecode.com</id>
+			<url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+		</pluginRepository>
+	</pluginRepositories>
 
 </project>
