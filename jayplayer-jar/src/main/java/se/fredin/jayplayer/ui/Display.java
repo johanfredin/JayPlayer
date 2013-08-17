@@ -75,7 +75,7 @@ public class Display extends JFrame implements Runnable {
 		
 	
 	public Display(final TrackService trackService) {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Display.class.getResource("/res/desktop_small.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Display.class.getResource("/images/desktop_small.png")));
 		this.trackService = trackService;
 		this.playerSettings = new PlayerSettings();
 		this.iconLoader = new IconLoader();

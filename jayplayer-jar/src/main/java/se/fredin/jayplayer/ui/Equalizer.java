@@ -27,7 +27,7 @@ public class Equalizer extends JFrame {
 	private JSlider balanceSlider, playBackRateSlider;
 
 	public Equalizer(final TrackService trackService) {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Equalizer.class.getResource("/res/desktop_small.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Equalizer.class.getResource("/images/desktop_small.png")));
 		setResizable(false);
 		setTitle("Equalizer");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

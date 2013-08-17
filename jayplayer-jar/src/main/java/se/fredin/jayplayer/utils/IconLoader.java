@@ -1,5 +1,6 @@
 package se.fredin.jayplayer.utils;
 
+import java.awt.Toolkit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class IconLoader {
 	}
 	
 	private ImageIcon get(String path) {
-		return new ImageIcon(IconLoader.class.getResource("/res/" + path));
+		return new ImageIcon(Toolkit.getDefaultToolkit().getImage(IconLoader.class.getResource("/images/" + path)));
 	}
 	
 	public ImageIcon getIcon(String key) {

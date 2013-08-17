@@ -25,7 +25,7 @@ public class AboutWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public AboutWindow() {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(AboutWindow.class.getResource("/res/desktop_small.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(AboutWindow.class.getResource("/images/desktop_small.png")));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setResizable(false);
 		setTitle("About");
@@ -40,7 +40,7 @@ public class AboutWindow extends JFrame {
 		contentPane.add(panel, BorderLayout.NORTH);
 		
 		JLabel lblNewLabel = new JLabel("");
-		lblNewLabel.setIcon(new ImageIcon(AboutWindow.class.getResource("/res/logo_small.png")));
+		lblNewLabel.setIcon(new ImageIcon(AboutWindow.class.getResource("/images/logo_small.png")));
 		panel.add(lblNewLabel);
 		
 		JPanel panel_1 = new JPanel();

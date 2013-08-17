@@ -15,8 +15,7 @@
 	<properties>
 		<java-version>1.7</java-version>
 		<jayplayer-version>1.0-SNAPSHOT</jayplayer-version>
-		<jfxpath>/home/johan/oracle java/jre/lib/jfxrt.jar</jfxpath>
-		<respath>/home/johan/workspace/MediaPlayer/JayPlayer_Resources.jar</respath>
+		<jfxpath>${java.home}/lib/jfxrt.jar</jfxpath>
 	</properties>
 
 	<build>
@@ -31,7 +30,7 @@
 				</configuration>
 			</plugin>
 
- 		<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.4</version>
@@ -52,16 +51,16 @@
 					<execution>
 						<configuration>
 							<archive>
-						<manifest>
-							<mainClass>se.fredin.jayplayer.Jayplayer</mainClass>
-						</manifest>
-					</archive>
+								<manifest>
+									<mainClass>se.fredin.jayplayer.Jayplayer</mainClass>
+								</manifest>
+							</archive>
 							<!-- Optional -->
 							<onejarVersion>0.97</onejarVersion>
-							
+
 							<!-- Optional, default is false -->
 							<attachToBuild>true</attachToBuild>
-							
+
 						</configuration>
 						<goals>
 							<goal>one-jar</goal>
@@ -69,8 +68,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-
 		</plugins>
 	</build>
 
@@ -95,14 +92,6 @@
 			<version>2.2.25</version>
 			<scope>system</scope>
 			<systemPath>${jfxpath}</systemPath>
-		</dependency>
-		
-		<dependency>
-			<groupId>se.fredin</groupId>
-			<artifactId>jayplayer_resources</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${respath}</systemPath>
 		</dependency>
 
 	</dependencies>
