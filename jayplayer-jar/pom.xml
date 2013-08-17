@@ -6,7 +6,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>se.fredin.jayplayer</groupId>
-	<artifactId>jayplayer-jar</artifactId>
+	<artifactId>jayplayer</artifactId>
 	<packaging>jar</packaging>
 	<name>JayPlayer</name>
 	<version>0.9</version>
