@@ -16,6 +16,7 @@
 		<java-version>1.7</java-version>
 		<jayplayer-version>1.0-SNAPSHOT</jayplayer-version>
 		<jfxpath>${java.home}/lib/jfxrt.jar</jfxpath>
+		
 	</properties>
 
 	<build>

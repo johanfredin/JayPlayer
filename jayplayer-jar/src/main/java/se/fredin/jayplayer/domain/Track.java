@@ -11,7 +11,7 @@ public class Track {
 	private MediaPlayer player;
 	private Media media;
 	private int id;
-	private boolean wasPlayed;
+	private boolean isPlaying, wasPlayed;
 	
 	protected Track() {}
 	
@@ -52,11 +52,13 @@ public class Track {
 			player.play();
 			player.onEndOfMediaProperty().setValue(r);
 			wasPlayed = true;
+			isPlaying = true;
 		}
 	}
 	
 	public void stop() {
 		player.stop();
+		isPlaying = false;
 	}
 	
 	public void setBalance(float balance) {
@@ -106,6 +108,10 @@ public class Track {
 	
 	public double getTimeRemaining() {
 		return getTotalTime() * getCurrentTime();
+	}
+	
+	public boolean isPlaying() {
+		return this.isPlaying;
 	}
 	
 	

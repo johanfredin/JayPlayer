@@ -157,18 +157,6 @@ public class Display extends JFrame implements Runnable {
 		trackProgressPanel.add(timeLabel);
 		
 		progressBar = new JProgressBar();
-		progressBar.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				//TODO: Skip forward/backward in track
-			}
-		});
-		progressBar.addMouseMotionListener(new MouseMotionAdapter() {
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				//TODO: Skip forward/backward in track
-			}
-		});
 		progressBar.setPreferredSize(new Dimension(300, 30));
 		trackProgressPanel.add(progressBar);
 		
@@ -248,13 +236,13 @@ public class Display extends JFrame implements Runnable {
 				if(!playListDlm.isEmpty()) {
 					trackService.stop();
 					resetTimer();
+					playListDisplay.setSelectedIndex(playListDisplay.locationToIndex(e.getPoint()));
+					trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
 					switch(e.getButton()) {
 					case MouseEvent.BUTTON1:
-						trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
 						playerSettings.saveSelectedPlaylistIndex("" + playListDisplay.getSelectedIndex());
 						break;
 					case MouseEvent.BUTTON2 : case MouseEvent.BUTTON3:
-						playListDisplay.setSelectedIndex(playListDisplay.locationToIndex(e.getPoint()));
 						showEditPopup(playListDisplay, e.getX(), e.getY(), "Playlist");
 						break;
 					}
@@ -303,16 +291,12 @@ public class Display extends JFrame implements Runnable {
 						deleteTrack();
 						break;
 					case KeyEvent.VK_UP:
-						if(trackService.getId() > 0) { 
-							tracksDisplay.setSelectedIndex(trackService.previousId());
-							playerSettings.saveSelectedTrackIndex("" + trackService.getId());
-						}
+						tracksDisplay.setSelectedIndex(trackService.previousId());
+						playerSettings.saveSelectedTrackIndex("" + trackService.getId());
 						break;
 					case KeyEvent.VK_DOWN:
-						if(trackService.getId() < trackService.getTrackAmount() - 1) { 
-							tracksDisplay.setSelectedIndex(trackService.nextId()); 
-							playerSettings.saveSelectedTrackIndex("" + trackService.getId());
-						}
+						tracksDisplay.setSelectedIndex(trackService.nextId()); 
+						playerSettings.saveSelectedTrackIndex("" + trackService.getId());
 						break;
 					}
 				}
@@ -336,7 +320,7 @@ public class Display extends JFrame implements Runnable {
 				if(!trackService.isEmpty()) {
 					switch(e.getButton()) {
 					case MouseEvent.BUTTON2 : case MouseEvent.BUTTON3:
-						showEditPopup(tracksDisplay, e.getX(), e.getY(), "tracks");
+						showEditPopup(tracksDisplay, e.getX(), e.getY(), "track");
 						tracksDisplay.setSelectedIndex(tracksDisplay.locationToIndex(e.getPoint()));
 						trackService.setId(tracksDisplay.getSelectedIndex());
 						break;
@@ -382,6 +366,7 @@ public class Display extends JFrame implements Runnable {
 		trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
 		tracksDisplay.setSelectedIndex(playerSettings.loadSelectedTrackIndex());
 		setVisible(true);
+			
 	}
 	
 	private void initMenuBar() {
@@ -458,7 +443,10 @@ public class Display extends JFrame implements Runnable {
 		trackService.deleteTrack(trackService.getId());
 		statusField.setText(trackService.getStatus());
 		playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
+		tracksDisplay.setSelectedIndex(trackService.getId());
 		playerSettings.saveSelectedTrackIndex("" + playListDisplay.getSelectedIndex());
+		if(trackService.isEmpty())
+			resetTimer();
 	}
 	
 	private void deletePlaylist() {
@@ -467,6 +455,7 @@ public class Display extends JFrame implements Runnable {
 		tracksListDlm.removeAllElements();
 		playListDlm.removeElement(playListDisplay.getSelectedValue());
 		statusField.setText(playlistService.getStatus());
+		resetTimer();
 	}
 	
 	private void setVolume() {
@@ -505,19 +494,19 @@ public class Display extends JFrame implements Runnable {
 		
 	private void showEditPopup(Component component, int x, int y, final String typeToEdit) {
 		JPopupMenu playlistPopupMenu = new JPopupMenu();
-		JMenuItem renameItem = new JMenuItem();
-		
-		if(typeToEdit.equals("Playlist"))
-			renameItem.setText("Rename " + typeToEdit);
-		else
-			renameItem.setText("Play " + typeToEdit);
+		JMenuItem addOrPlayItem = new JMenuItem();
 		JMenuItem removeItem = new JMenuItem("Remove " + typeToEdit);
 		
-		renameItem.addActionListener(new ActionListener() {
+		if(typeToEdit.equals("Playlist"))
+			addOrPlayItem.setText("Add tracks");
+		else
+			addOrPlayItem.setText("Play " + typeToEdit);
+				
+		addOrPlayItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(typeToEdit.equals("Playlist")) {
-					//TODO: rename playlist
+					loadMusicFromMenu();
 				} else {
 					trackService.playTrack(tracksDisplay.getSelectedIndex(), Display.this);
 					playPauseButton.setIcon(iconLoader.getIcon(iconLoader.PAUSE));
@@ -536,7 +525,7 @@ public class Display extends JFrame implements Runnable {
 					deleteTrack();
 			}
 		}); 
-		playlistPopupMenu.add(renameItem);
+		playlistPopupMenu.add(addOrPlayItem);
 		playlistPopupMenu.add(removeItem);
 		playlistPopupMenu.show(component, x, y);
 	}
@@ -579,7 +568,7 @@ public class Display extends JFrame implements Runnable {
 	
 	private void loadMusicFromMenu() {
 		JFileChooser openFile = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Music", "mp3", "wav", "MP3", "WAV");
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("Music", "mp3", "wav", "MP3", "WAV", "wave", "WAVE");
 		openFile.setFileFilter(filter);
 		openFile.setMultiSelectionEnabled(true);
 		int returnType = openFile.showOpenDialog(this);
@@ -592,32 +581,39 @@ public class Display extends JFrame implements Runnable {
 		}
 	}
 	
-	private void loadMusic(List<File> selectedFiles) {
-		byte numberOfFilesAdded = 0;
-		for(File file : selectedFiles) {
-			if(file.getAbsolutePath().toLowerCase().endsWith("wav") || file.getAbsolutePath().toLowerCase().endsWith("mp3")) {
-				Track track = new Track(file.getAbsolutePath());
-				track.setVolume(volumeSlider.getValue() * 0.01f);
-				trackService.addTrack(track);
-				tracksListDlm.addElement(track.getTitle());
-				numberOfFilesAdded++;
+	private void loadMusic(final List<File> selectedFiles) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				byte numberOfFilesAdded = 0;
+				for(File file : selectedFiles) {
+					if(file.getAbsolutePath().toLowerCase().endsWith("wav") || file.getAbsolutePath().toLowerCase().endsWith("mp3")  || file.getAbsolutePath().toLowerCase().endsWith("wave")) {
+						Track track = new Track(file.getAbsolutePath());
+						track.setVolume(volumeSlider.getValue() * 0.01f);
+						trackService.addTrack(track);
+						tracksListDlm.addElement(track.getTitle());
+						numberOfFilesAdded++;
+					}
+				}
+				trackService.setId(0);
+				tracksDisplay.setSelectedIndex(trackService.getId());
+				if(!playListDlm.isEmpty()) {
+					
+					playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
+					statusField.setText("Added " + numberOfFilesAdded + ((numberOfFilesAdded > 1) ? " tracks" : " track ") + "to playlist: " + playListDisplay.getSelectedValue());
+				} else
+					statusField.setText("Added " + numberOfFilesAdded + ((numberOfFilesAdded > 1) ? " tracks" : " track"));
 			}
-		}
-		trackService.setId(0);
-		tracksDisplay.setSelectedIndex(trackService.getId());
-		if(!playListDlm.isEmpty()) {
-			playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
-			statusField.setText("Added " + numberOfFilesAdded + ((numberOfFilesAdded > 1) ? " tracks" : " track ") + "to playlist: " + playListDisplay.getSelectedValue());
-		} else
-			statusField.setText("Added " + numberOfFilesAdded + ((numberOfFilesAdded > 1) ? " tracks" : " track"));
+		}).start();
+		
 	}
 
 	private void clearTracks() {
-		trackService.stop();
 		tracksListDlm.removeAllElements();
 		trackService.clearTrackList();
 		statusField.setText(trackService.getStatus());
 		playlistService.updatePlaylist(playListDisplay.getSelectedValue(), trackService.getTracks());
+		resetTimer();
 	}
 
 	private void createNewPlaylist() {
@@ -638,6 +634,7 @@ public class Display extends JFrame implements Runnable {
 				playlistService.createNewPlaylist(playlistName, new ArrayList<Track>());
 			}
 			playListDisplay.setSelectedIndex(playListDlm.getSize() - 1);
+			trackService.setTrackList(playlistService.getPlaylist(playListDisplay.getSelectedValue()));
 			statusField.setText(playlistService.getStatus());
 		}
 	}
@@ -656,16 +653,16 @@ public class Display extends JFrame implements Runnable {
 	 * Will tick every second and update the current time until track is stopped or finished
 	 */
 	public void updateTimeLabels() {
-		final int INDEX = tracksDisplay.getSelectedIndex();
+		final Track track = trackService.getTrack(tracksDisplay.getSelectedIndex());
+		totalDuration.setText(formatter.format(track.getTotalTime(), 2));
+		progressBar.setMaximum((int) (track.getTotalTime() * 10000));
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				totalDuration.setText(formatter.format(trackService.getTotalTime(INDEX), 2));
-				progressBar.setMaximum((int) (trackService.getTotalTime(INDEX) * 10000));
 				try {
 					while(!trackService.isStopTimer()) {
-						timeLabel.setText(formatter.format(trackService.getCurrentTime(INDEX), 2));
-						progressBar.setValue((int) (trackService.getCurrentTime(INDEX) * 10000));
+						timeLabel.setText(formatter.format(track.getCurrentTime(), 2));
+						progressBar.setValue((int) (track.getCurrentTime() * 10000));
 						Thread.sleep(100);
 					}
 				} catch(Exception ex) {
@@ -673,10 +670,6 @@ public class Display extends JFrame implements Runnable {
 				}
 			}
 		}).start();
-		
-		
 	}
-	
-	
 	
 }

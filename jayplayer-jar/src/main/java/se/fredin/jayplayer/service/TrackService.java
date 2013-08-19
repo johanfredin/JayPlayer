@@ -136,24 +136,29 @@ public class TrackService {
 
 	public void deleteTrack(int id) {
 		if(!tracks.isEmpty()) {
+			if(tracks.get(id).isPlaying())
+				stopTimer = true;
+			tracks.get(id).stop();
 			status = "Removed " + tracks.get(id).getTitle();
 			tracks.remove(id);
+			setId(nextId());
 		}
 	}
 
 	public void clearTrackList() {
 		if(!tracks.isEmpty()) {
+			stop();
 			tracks.clear();
 			status = "Removed All Tracks";
 		}
 	}
 	
 	public int nextId() {
-		return this.id++;
+		return (this.id >= tracks.size() - 1 ?  tracks.size() - 1 : this.id++);
 	}
 	
 	public int previousId() {
-		return this.id--;
+		return (this.id <= 0 ? 0 : this.id--);
 	}
 	
 	public void repeat(boolean repeat) {
@@ -206,6 +211,10 @@ public class TrackService {
 	
 	public boolean isStopTimer() {
 		return this.stopTimer;
+	}
+	
+	public void setStopTimer(boolean stopTimer) {
+		this.stopTimer = stopTimer;
 	}
 	
 
