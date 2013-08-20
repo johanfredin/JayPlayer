@@ -16,6 +16,12 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import se.fredin.jayplayer.Jayplayer;
 
+/**
+ * A window containing information about current version of the JayPlayer 
+ * as well as a link to the repository site.
+ * @author johan
+ *
+ */
 public class AboutWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;

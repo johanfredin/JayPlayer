@@ -53,7 +53,11 @@ import se.fredin.jayplayer.utils.IconLoader;
 import se.fredin.jayplayer.utils.MenuActions;
 import se.fredin.jayplayer.utils.PlayerSettings;
 
-
+/**
+ * The GUI 
+ * @author johan
+ *
+ */
 public class Display extends JFrame implements Runnable {
 	
 	private TrackService trackService;
@@ -73,7 +77,10 @@ public class Display extends JFrame implements Runnable {
 	private JButton shuffleButton, repeatButton;
 	private JLabel timeLabel, totalDuration;
 		
-	
+	/**
+	 * Create the GUI
+	 * @param trackService the {@link TrackService} this GUI will be working on.
+	 */
 	public Display(final TrackService trackService) {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Display.class.getResource("/images/desktop_small.png")));
 		this.trackService = trackService;
@@ -644,15 +651,18 @@ public class Display extends JFrame implements Runnable {
 		statusField.setText(playlistService.getStatus());
 	}
 
+	/**
+	 * Set the {@link TrackService} to play the next track in the list once playback of current {@link Track} has ended.
+	 */
 	@Override
 	public void run() {
 		playNextOrPreviousTrack("next");
 	}
 	
-	/**
+	/*
 	 * Will tick every second and update the current time until track is stopped or finished
 	 */
-	public void updateTimeLabels() {
+	private void updateTimeLabels() {
 		final Track track = trackService.getTrack(tracksDisplay.getSelectedIndex());
 		totalDuration.setText(formatter.format(track.getTotalTime(), 2));
 		progressBar.setMaximum((int) (track.getTotalTime() * 10000));

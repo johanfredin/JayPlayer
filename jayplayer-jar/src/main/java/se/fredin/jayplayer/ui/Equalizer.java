@@ -20,12 +20,21 @@ import se.fredin.jayplayer.service.TrackService;
 import java.awt.Toolkit;
 import java.awt.Font;
 
+/**
+ * A window where user can set balance and playback rate.
+ * @author johan
+ *
+ */
 public class Equalizer extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
 	private JSlider balanceSlider, playBackRateSlider;
 
+	/**
+	 * Creates the window
+	 * @param trackService the tracks the equalizer will work with
+	 */
 	public Equalizer(final TrackService trackService) {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Equalizer.class.getResource("/images/desktop_small.png")));
 		setResizable(false);

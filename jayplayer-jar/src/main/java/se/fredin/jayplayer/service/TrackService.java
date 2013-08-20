@@ -6,7 +6,7 @@ import java.util.List;
 import se.fredin.jayplayer.domain.Track;
 
 /**
- * TrackService manages all users Track objects. 
+ * TrackService manages all users {@link Track} objects. 
  *  @author johan
  *
  */
@@ -246,17 +246,25 @@ public class TrackService {
 	}
 	
 	/**
-	 * Increments 
-	 * @return
+	 * Increments the current index by one assuming its not the last index of the tracks list.
+	 * @return the next index or the last index if current index is the last.
 	 */
 	public int nextId() {
 		return (this.id >= tracks.size() - 1 ?  tracks.size() - 1 : this.id++);
 	}
 	
+	/**
+	 * Decrements the current index by one assuming its not the first index of the tracks list.
+	 * @return the previous index or the first if current index is the first.
+	 */
 	public int previousId() {
 		return (this.id <= 0 ? 0 : this.id--);
 	}
 	
+	/**
+	 * Sets whether or not to repeat the tracks list
+	 * @param repeat if <b>true</b> list will be repeated
+	 */
 	public void repeat(boolean repeat) {
 		if(repeat) 
 			status = "Repeat Enabled";
@@ -265,19 +273,36 @@ public class TrackService {
 		this.repeat = repeat;
 	}
 
-
+	/**
+	 * Retrieves the current time in minutes of selected track
+	 * @param id track associated with selected index  
+	 * @return the current time in minutes of selected track
+	 */
 	public double getCurrentTime(int id) {
 		return tracks.get(id).getCurrentTime();
 	}
 	
+	/**
+	 * Retrieves the total length in minutes of selected track
+	 * @param id track associated with selected index  
+	 * @return the total length in minutes of selected track
+	 */
 	public double getTotalTime(int id) {
 		return tracks.get(id).getTotalTime();
 	}
 	
+	/**
+	 * Retrieves the amount of tracks in the list
+	 * @return the amount of tracks in the list
+	 */
 	public int getTrackAmount() {
 		return tracks.size();
 	}
 	
+	/**
+	 * Retrieves wheter or not the tracks list is empty
+	 * @return <b>true</b> if tracks list is empty
+	 */
 	public boolean isEmpty() {
 		return tracks.isEmpty();
 	}
